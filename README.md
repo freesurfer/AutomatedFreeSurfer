@@ -32,7 +32,7 @@ This script processes T1 images in a BIDS-formatted dataset using FreeSurfer's r
 
 #### Usage Example:
 ```sh
-./[SCRIPT_NAME]
+bash main_script.sh 
 ```
 
 #### Output:
