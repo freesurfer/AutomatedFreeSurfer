@@ -33,6 +33,10 @@ These scripts were designed to run with minimal user input. You will be presente
 5. **Tables Creation**:
    The script will create tables with all the cross-sectional data.
 
+6. **Longitudinal stream**:
+   The script checks if there are more than 1 session per subject with already processed T1s.
+   - If this is satisfied, the script will run Freesurfer's longitudinal pipeline, creating new folders for each output (base, time 1, and time 2)
+
 #### Usage Example:
 ```sh
 bash main_script.sh 
