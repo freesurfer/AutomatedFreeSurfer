@@ -1,7 +1,7 @@
 ### README
 
 #### Description:
-This script processes T1 images in a BIDS-formatted dataset using FreeSurfer's recon-all, creates a quality control montage of the FreeSurfer output for each subject and session, and extracts the metrics into a CSV file. It runs the longitudinal stream if there's more than one session per subject.
+These scripts process T1 images in a BIDS-formatted dataset using FreeSurfer's recon-all, creates a quality control montage of the FreeSurfer output for each subject and session, and extracts the metrics into a CSV file. It runs the longitudinal stream if there's more than one session per subject.
 
 #### Author:
 - Carolina Ferreira-Atuesta (September 2023)
@@ -12,7 +12,7 @@ This script processes T1 images in a BIDS-formatted dataset using FreeSurfer's r
   ![Image 18-09-2023 at 07 47](https://github.com/cfatuesta/ENIGMA/assets/42354106/2b7a68fc-4eb7-4d45-9283-e2142f4b0859)
 - FreeSurfer must be installed, and the following scripts should be in your `SUBJECTS_DIR` path: `process_csv.py`, `merge_csv.py`, and `process_longitudinal.py`.
 - FreeSurfer's `freeview` and ImageMagick's `magick` command should be available in your system. To install ImageMagick, you can run: `brew install imagemagick`.
-- Make sure you have python3 installed (run 'python --version' from your terminal to check which version you have. If its not python3, run:
+- Make sure you have python3 installed. Run 'python --version' from your terminal to check which version you have. If its not python3, run:
   - 'brew install pyenv'
   - 'pyenv install 3.10.10'
   - 'pyenv global 3.10.10'
@@ -24,8 +24,8 @@ This script processes T1 images in a BIDS-formatted dataset using FreeSurfer's r
 
 These scripts were designed to run with minimal user input. You will be presented with a series of questions that you need to answer in order to start specific processes. 
 
-1. **Starting the Script**:
-   Run the script in your terminal. If the dataset isn't organized and named correctly, press `Ctrl+C` to exit. Otherwise, press `Enter` to continue.
+1. **Starting the Main Script**:
+   Run the script main_script.sh in your terminal. If the dataset isn't organized and named correctly, press `Ctrl+C` to exit. Otherwise, press `Enter` to continue.
 
 2. **Enter Paths**:
    - If `SUBJECTS_DIR` and `FREESURFER_HOME` are not set, you will be prompted to enter the paths to the SUBJECTS dataset and Freesurfer installation.
