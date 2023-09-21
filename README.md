@@ -1,7 +1,10 @@
-### README for FreeSurfer's recon-all BIDS Processing Script
+### README
 
 #### Description:
 This script processes T1 images in a BIDS-formatted dataset using FreeSurfer's recon-all, creates a quality control montage of the FreeSurfer output for each subject and session, and extracts the metrics into a CSV file. It runs the longitudinal stream if there's more than one session per subject.
+
+![PHOTO-2023-09-18-13-49-25](https://github.com/cfatuesta/ENIGMA/assets/42354106/ea96a325-4cf7-4081-abdb-f6a4b480b12a)
+
 
 #### Author:
 - Carolina Ferreira-Atuesta (September 2023)
