@@ -38,7 +38,7 @@ These scripts were designed to run with minimal user input. You will be presente
    - The script will create tables with all the cross-sectional and longitudinal data if available.
    - See the image below for an example of a generated file. 
    
-  <img width="901" alt="Screenshot 2023-09-21 at 09 52 23" src="https://github.com/cfatuesta/ENIGMA/assets/42354106/9be972e4-eb75-48de-89ce-ddd4bff44b1b">
+      <img width="901" alt="Screenshot 2023-09-21 at 09 52 23" src="https://github.com/cfatuesta/ENIGMA/assets/42354106/9be972e4-eb75-48de-89ce-ddd4bff44b1b">
 
 7. **Longitudinal stream**:
    - The script checks if there is more than 1 session per subject with already processed T1s.
