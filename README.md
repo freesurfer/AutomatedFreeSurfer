@@ -14,6 +14,8 @@ This script processes T1 images in a BIDS-formatted dataset using FreeSurfer's r
 
 #### Instructions:
 
+These scripts were designed to run with minimal user input. You will be presented with a series of questions that you need to answer in order to start specific processes. 
+
 1. **Starting the Script**:
    Run the script in your terminal. If the dataset isn't organized and named correctly, press `Ctrl+C` to exit. Otherwise, press `Enter` to continue.
 
