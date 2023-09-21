@@ -1,7 +1,9 @@
 ### README
 
 #### Description:
-These scripts process T1 images in a BIDS-formatted dataset using FreeSurfer's recon-all, creates a quality control montage of the FreeSurfer output for each subject and session, and extracts the metrics into a CSV file. It runs the longitudinal stream if there's more than one session per subject.
+These scripts process T1 images in a BIDS-formatted dataset using FreeSurfer's recon-all and the hippocampal and amygdala subfields segmentation stream, create a quality control montage of the FreeSurfer output for each subject and session, and extract the metrics into a CSV file. It runs the longitudinal stream if there's more than one session per subject.
+
+They were designed to run with minimal user input. You will be presented with a series of questions that you need to answer in order to start specific processes. 
 
 #### Author:
 - Carolina Ferreira-Atuesta (September 2023)
@@ -21,8 +23,6 @@ These scripts process T1 images in a BIDS-formatted dataset using FreeSurfer's r
   - '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
 
 #### Instructions:
-
-These scripts were designed to run with minimal user input. You will be presented with a series of questions that you need to answer in order to start specific processes. 
 
 1. **Starting the Main Script**:
    Run the script main_script.sh in your terminal. If the dataset isn't organized and named correctly, press `Ctrl+C` to exit. Otherwise, press `Enter` to continue.
