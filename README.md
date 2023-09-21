@@ -3,7 +3,8 @@
 #### Description:
 This script processes T1 images in a BIDS-formatted dataset using FreeSurfer's recon-all, creates a quality control montage of the FreeSurfer output for each subject and session, and extracts the metrics into a CSV file. It runs the longitudinal stream if there's more than one session per subject.
 
-![PHOTO-2023-09-18-13-49-25](https://github.com/cfatuesta/ENIGMA/assets/42354106/ea96a325-4cf7-4081-abdb-f6a4b480b12a)
+
+![Image 18-09-2023 at 07 47](https://github.com/cfatuesta/ENIGMA/assets/42354106/76762b3b-75e0-4833-9cc1-be5f38637c0f)
 
 
 #### Author:
