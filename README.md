@@ -3,16 +3,13 @@
 #### Description:
 This script processes T1 images in a BIDS-formatted dataset using FreeSurfer's recon-all, creates a quality control montage of the FreeSurfer output for each subject and session, and extracts the metrics into a CSV file. It runs the longitudinal stream if there's more than one session per subject.
 
-![Image 18-09-2023 at 07 47](https://github.com/cfatuesta/ENIGMA/assets/42354106/2b7a68fc-4eb7-4d45-9283-e2142f4b0859)
-
-
-
 #### Author:
 - Carolina Ferreira-Atuesta (September 2023)
 - Email: cfatuesta@gmail.com
 
 #### Prerequisites:
 - Dataset must be organized according to the BIDS specification, including correctly named main directory and subdirectories.
+  ![Image 18-09-2023 at 07 47](https://github.com/cfatuesta/ENIGMA/assets/42354106/2b7a68fc-4eb7-4d45-9283-e2142f4b0859)
 - FreeSurfer must be installed, and the following scripts should be in your `SUBJECTS_DIR` path: `process_csv.py`, `merge_csv.py`, and `process_longitudinal.py`.
 - FreeSurfer's `freeview` and ImageMagick's `magick` command should be available in your system. To install ImageMagick, you can run: `brew install imagemagick`.
 
