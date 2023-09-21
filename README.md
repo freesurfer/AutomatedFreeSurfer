@@ -29,12 +29,19 @@ These scripts were designed to run with minimal user input. You will be presente
 
 4. **Generating Montages**:
    - If there are T1 images without montages, the script will ask whether to generate montages for these images. Type `yes` to proceed.
+   - Two montages are generated for each subject/session - see below for examples:
+     ![montage-3d](https://github.com/cfatuesta/ENIGMA/assets/42354106/15cd17f8-269a-4f8a-9953-2d88a9b00b8d)
+      ![montage-2d](https://github.com/cfatuesta/ENIGMA/assets/42354106/82049d88-13a3-4ab8-963a-92ca5d40575d)
+
 
 5. **Tables Creation**:
-   The script will create tables with all the cross-sectional data.
+   - The script will create tables with all the cross-sectional and longitudinal data if available.
+   - See the image below for an example of a generated file. 
+   
+  <img width="901" alt="Screenshot 2023-09-21 at 09 52 23" src="https://github.com/cfatuesta/ENIGMA/assets/42354106/9be972e4-eb75-48de-89ce-ddd4bff44b1b">
 
-6. **Longitudinal stream**:
-   The script checks if there are more than 1 session per subject with already processed T1s.
+7. **Longitudinal stream**:
+   - The script checks if there is more than 1 session per subject with already processed T1s.
    - If this is satisfied, the script will run Freesurfer's longitudinal pipeline, creating new folders for each output (base, time 1, and time 2)
 
 #### Usage Example:
