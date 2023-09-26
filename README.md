@@ -12,7 +12,7 @@ They were designed to run with minimal user input. You will be presented with a 
 #### Prerequisites:
 - Dataset must be organized according to the BIDS specification, including correctly named main directory and subdirectories.
   ![Image 18-09-2023 at 07 47](https://github.com/cfatuesta/ENIGMA/assets/42354106/2b7a68fc-4eb7-4d45-9283-e2142f4b0859)
-- FreeSurfer must be installed, and the following scripts should be in your `SUBJECTS_DIR` path: `process_csv.py`, `merge_csv.py`, and `process_longitudinal.py`.
+- FreeSurfer must be installed, and the following scripts should be in your `SUBJECTS_DIR` path (this corresponds to the Enigma folder on the picture above) : `main_script.sh`, `process_csv.py`, `merge_csv.py`, and `process_longitudinal.py`.
 - FreeSurfer's `freeview` and ImageMagick's `magick` command should be available in your system. To install ImageMagick, you can run: `brew install imagemagick`.
 - Make sure you have python3 installed. Run `python --version` from your terminal to check which version you have. If its not python3, run:
   - `brew install pyenv`
