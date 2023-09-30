@@ -34,8 +34,10 @@ They were designed to run with minimal user input. You will be presented with a 
 3. **Processing T1 Images**:
    - The script will display all found T1 images and ask whether to process the images through the cross-sectional pipeline. Type `yes` to proceed.
 
-    ❗️ If you have T1s that have already been processed through Freesurfer but the output is somewhere else, please copy all the generated output folders into the subject directory, following this path specifications: 
-       Make sure that the "log" folder and its files are saved in the new path as the scripts use these logs to decide wheather or not the T1 needs additional processing. 
+    ❗️ 	If you have T1s that have been processed through Freesurfer, but the outputs are located in a different directory, relocate them to the designated subject directory: 
+
+        Please make sure to follow the given path specifications while relocating the output folders.
+        It is crucial to also copy the “log” folder and all of its files to the new location, as the scripts use the information in these logs to determine whether additional processing is needed for the T1s.
 
 4. **Generating Montages**:
    - If there are T1 images without montages, the script will ask whether to generate montages for these images. Type `yes` to proceed.
