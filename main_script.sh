@@ -235,8 +235,8 @@ if [ ${#t1s_not_processed[@]} -gt 0 ]; then
         echo "Starting the cross-sectional pipeline..."
 
         for t1_path in "${t1s_not_processed[@]}"; do
-            subj=$(echo "$t1_path" | grep -Eo 'sub-[a-z0-9]+' | head -n1)
-            session=$(echo "$t1_path" | grep -Eo 'ses-[0-9]+' | head -n1)
+            subj=$(echo "$t1_path" | grep -Eo 'sub-[a-zA-Z0-9]+' | head -n1)
+            session=$(echo "$t1_path" | grep -Eo 'ses-[a-zA-Z0-9]+' | head -n1)
             FREESURFER_OUT="${SUBJECTS_DIR}/${subj}/${session}/derivatives"
             
             if [ -f "$t1_path" ]; then
@@ -257,8 +257,8 @@ if [ ${#t1s_without_montage[@]} -gt 0 ]; then
         echo "Generating montages..."
 
         for t1_path in "${t1s_without_montage[@]}"; do
-            subj=$(echo "$t1_path" | grep -Eo 'sub-[a-z0-9]+' | head -n1)
-            session=$(echo "$t1_path" | grep -Eo 'ses-[0-9]+' | head -n1)
+            subj=$(echo "$t1_path" | grep -Eo 'sub-[a-zA-Z0-9]+' | head -n1)
+            session=$(echo "$t1_path" | grep -Eo 'ses-[a-zA-Z0-9]+' | head -n1)
             FREESURFER_OUT="${SUBJECTS_DIR}/${subj}/${session}/derivatives"
             
             process_visualization "$subj" "$session"
