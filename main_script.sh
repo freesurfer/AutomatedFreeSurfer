@@ -72,30 +72,33 @@ export FREESURFER_HOME
 source "$FREESURFER_HOME/SetUpFreeSurfer.sh"
 
 # List all subjects in the SUBJECTS dataset
-SUBJECTS=$(ls "$SUBJECTS_DIR" | grep "sub-")
+SUBJECTS=$(ls "$SUBJECTS_DIR" | grep -Eo 'sub-[a-zA-Z0-9]+')
 
 # Display all T1s found
 t1s_found=0
 echo "Found the following T1 images:"
 for subj in $SUBJECTS; do
-    for session in ses-1 ses-2 ses-3; do
-        T1="${SUBJECTS_DIR}/${subj}/${session}/anat/${subj}_${session}_T1w.nii" #or ending in .nii.gz
+    for session in ses-01 ses-02 ses-03; do
+        T1="${SUBJECTS_DIR}/${subj}/${session}/anat/${subj}_${session}_T1w.nii" #or ending in .nii.g
+
         if [ ! -e "$T1" ]; then
             T1="${SUBJECTS_DIR}/${subj}/${session}/anat/${subj}_${session}_T1w.nii.gz"
+            T1_path="${SUBJECTS_DIR}/${subj}/${session}/anat/"
         fi
         if [ -f "$T1" ]; then
             echo "$T1"
             (( t1s_found++ ))
-            #create array of T1s
-            t1s_found+=("$T1")
+            # Create array of T1s
+            t1s_array+=("$T1")
         fi
     done
 done
 
-echo "Found $t1s_found T1 images."
+# Final message with the count
+echo "Total T1s found: $t1s_found"
 
 # Extracting metadata from the T1s
-python3 extract_metadata.py "$t1s_found"
+python3 extract_metadata.py "${t1s_array[@]}"
 
 
 
@@ -104,7 +107,7 @@ t1s_not_processed=()
 t1s_without_montage=()
 
 for subj in $SUBJECTS; do
-    for session in ses-1 ses-2 ses-3; do
+    for session in ses-01 ses-02 ses-03; do
         T1="${SUBJECTS_DIR}/${subj}/${session}/anat/${subj}_${session}_T1w.nii"
         if [ ! -e "$T1" ]; then
             T1="${SUBJECTS_DIR}/${subj}/${session}/anat/${subj}_${session}_T1w.nii.gz"
@@ -240,8 +243,8 @@ if [ ${#t1s_not_processed[@]} -gt 0 ]; then
             FREESURFER_OUT="${SUBJECTS_DIR}/${subj}/${session}/derivatives"
             
             if [ -f "$t1_path" ]; then
-                recon-all -i "$t1_path" -s "$subj" -all -qcache -sd "$FREESURFER_OUT"
-                segmentHA_T1.sh "$subj"
+                #recon-all -i "$t1_path" -s "$subj" -all -qcache -sd "$FREESURFER_OUT"
+                #segmentHA_T1.sh "$subj"
                 process_visualization "$subj" "$session"
             else
                 echo "T1 file not found for $subj"
