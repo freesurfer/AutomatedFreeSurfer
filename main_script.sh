@@ -94,6 +94,10 @@ done
 
 echo "Found $t1s_found T1 images."
 
+# Extracting metadata from the T1s
+python3 extract_metadata.py "$t1s_found"
+
+
 
 echo "Checking which T1s have not been processed through freesurfer..."
 t1s_not_processed=()
