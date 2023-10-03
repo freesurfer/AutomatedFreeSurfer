@@ -67,9 +67,10 @@ bash main_script.sh
 ```
 
 #### Output:
-- Quality control montage for each subject and session.
-- Metrics extracted into a CSV file.
+- Quality control montage of Freesurfer's output for each subject and session.
+- Freesurfer's metrics extracted into a CSV file.
 - Longitudinal stream data if there's more than one session per subject.
+- Metadata for each unique T1 extracted into a CSV file
 
 #### Notes:
 - Do not change the names of the required scripts in your `SUBJECTS_DIR` path.
