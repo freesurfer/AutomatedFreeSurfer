@@ -6,10 +6,10 @@
 # Author: Carolina Ferreira-Atuesta, Sept 2023
 # Contact: cfatuesta@gmail.com
 
-echo -e "FreeSurfer's recon-all BIDS Processing Script"
+echo -e "FreeSurfer's recon-all BIDS Processing Script - Parallelized"
 echo ""
 echo "This script will:"
-echo "- Run FreeSurfer's recon-all on all T1 images found in a BIDS dataset."
+echo "- Run FreeSurfer's recon-all on all T1 images found in a BIDS dataset, using PARALLELcores."
 echo "- Create a quality control montage of the FreeSurfer output for each subject and session."
 echo "- Extract the metrics into a CSV file."
 echo "- Run the longitudinal stream if there's more than one session per subject."
