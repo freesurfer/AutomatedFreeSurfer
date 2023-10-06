@@ -3,7 +3,7 @@
 #### Description:
 These scripts process T1 images in a BIDS-formatted dataset using FreeSurfer's recon-all and the hippocampal and amygdala subfields segmentation stream, create a quality control montage of the FreeSurfer output for each subject and session, and extract the metrics into a CSV file. It runs the longitudinal stream if there's more than one session per subject.
 
-They were designed to run with minimal user input. You will be presented with a series of questions that you need to answer in order to start specific processes. 
+They were designed to run with minimal user input. You will be presented with a series of questions that you need to answer in order to start specific processes. Just make sure to download all the scripts in this repo adn save them in your BIDS folder with the rest of your subjects' folder. 
 
 #### Author:
 - Carolina Ferreira-Atuesta (September 2023)
