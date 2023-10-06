@@ -2,34 +2,60 @@ import pandas as pd
 import os
 import sys
 
+def remove_duplicate_columns(df):
+    # Return DataFrame without duplicate columns
+    return df.loc[:, ~df.columns.duplicated()]
+
 def merge_csv_files(folder_path):
     # List all files in the given folder
+    print(f"Listing all CSV files in {folder_path}...")
     all_files = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith('.csv')]
 
     if not all_files:
         print("No CSV files found in the specified folder.")
         return
 
-    # Use Pandas to read and concatenate the CSV files into a single DataFrame object, merge them to the right, matchng the index column sub and ses
-    # read csv as csv /t delimited
-    dataframe = pd.read_csv(all_files[0], sep='\t')
-    for file in all_files[1:]:
-        #dont merge duplicates, keep the first onne
-        dataframe = dataframe.merge(pd.read_csv(file, sep='\t'), on=['sub', 'ses', 'pipeline'], how='right')
-        #if there is a column name with the same name but a _x or _y, only keep the first one, and erase the _x or _y
-        dataframe = dataframe.loc[:,~dataframe.columns.duplicated()]
-        dataframe.columns = dataframe.columns.str.replace('_x', '')
-        dataframe.columns = dataframe.columns.str.replace('_y', '')
+    # Segregate the files into long_ files and others
+    long_files = [f for f in all_files if 'long_' in os.path.basename(f)]
+    other_files = [f for f in all_files if 'long_' not in os.path.basename(f)]
+
+    def merge_files(files):
+        if not files:
+            return pd.DataFrame()  # Return empty DataFrame if files list is empty
+        df = pd.read_csv(files[0], sep='\t')
+        for file in files[1:]:
+            print(f"Merging {file}...")
+            df = df.merge(pd.read_csv(file, sep='\t'), on=['sub', 'ses', 'pipeline'], how='right')
+            df = df.loc[:, ~df.columns.duplicated()]
+            df.columns = df.columns.str.replace('_x', '').str.replace('_y', '')
+        return df
+
+    
+    long_df = merge_files(long_files)
+    other_df = merge_files(other_files)
+
+    # Remove duplicate columns from each DataFrame
+    long_df = remove_duplicate_columns(long_df)
+    other_df = remove_duplicate_columns(other_df)
+
+    # Create a combined list of all unique columns
+    # Create a combined list of all columns from both dataframes
+    all_columns = long_df.columns.tolist() + [col for col in other_df.columns if col not in long_df.columns]
+
+    # Reindex both dataframes to have the same columns
+    long_df = long_df.reindex(columns=all_columns)
+    other_df = other_df.reindex(columns=all_columns)
+
+    # Concatenate the two DataFrames
+    final_df = pd.concat([long_df, other_df], axis=0, ignore_index=True)
+
     # Save the merged DataFrame to a new CSV file one level above the folder
-    # first delete the old all_measures.csv if it exists
-    if os.path.exists(os.path.join(os.path.dirname(folder_path), 'all_measures.csv')):
-        os.remove(os.path.join(os.path.dirname(folder_path), 'all_measures.csv'))
-    # save the new all_measures.csv
-    dataframe.to_csv(os.path.join(os.path.dirname(folder_path), 'all_measures.csv'), sep='\t', index=False)
+    output_file = os.path.join(os.path.dirname(folder_path), 'all_measures.csv')
+    if os.path.exists(output_file):
+        os.remove(output_file)
+    final_df.to_csv(output_file, sep='\t', index=False)
 
-    #delete all duplicate rows 
-    dataframe.drop_duplicates(subset=['sub', 'ses', 'pipeline'], keep='first', inplace=True)
-
+    print("Merging process completed!")
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -44,3 +70,4 @@ if __name__ == "__main__":
         sys.exit(1)
 
     merge_csv_files(measures_folder)
+
