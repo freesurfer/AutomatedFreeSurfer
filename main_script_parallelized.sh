@@ -6,14 +6,17 @@
 # Author: Carolina Ferreira-Atuesta, Sept 2023
 # Contact: cfatuesta@gmail.com
 
-echo -e "FreeSurfer's recon-all BIDS Processing Script - Parallelized"
+echo -e "FreeSurfer's recon-all BIDS Processing Script"
 echo ""
 echo "This script will:"
-echo "- Run FreeSurfer's recon-all on all T1 images found in a BIDS dataset, using PARALLELcores."
+echo "- Run FreeSurfer's recon-all on all T1 images found in a BIDS dataset using multiple cores."
 echo "- Create a quality control montage of the FreeSurfer output for each subject and session."
 echo "- Extract the metrics into a CSV file."
+echo "- Extract T1 metadata into a CSV file."
 echo "- Run the longitudinal stream if there's more than one session per subject."
 echo ""
+echo "----------------------------------------------------------------------------------------"
+echo "----------------------------------------------------------------------------------------"
 
 echo "Note:"
 echo -e "Make sure your dataset is organized according to the BIDS specification. This entails:\n"
@@ -26,11 +29,22 @@ echo "Also make sure you have the following scripts in your SUBJECTS_DIR path:"
 echo "process_csv.py, merge_csv.py and process_longitudinal.py"
 echo "Do not change the names of these scripts."
 echo ""
+echo "----------------------------------------------------------------------------------------"
+echo "----------------------------------------------------------------------------------------"
 
 
 
 echo -e "If your dataset isn't organized and named correctly, press Ctrl+C to exit."
 echo "Otherwise, press enter to continue."
+echo ""
+echo ""
+echo ""
+echo ""
+echo "Please DO NOT close this window until the script is finished."
+echo ""
+echo ""
+echo ""
+echo ""
 
 # Dependency Checks
 if ! command -v freeview &> /dev/null; then
@@ -40,6 +54,11 @@ fi
 
 if ! command -v magick &> /dev/null; then
     echo "Error: ImageMagick's magick command is not found. To install, type: brew install imagemagick"
+    exit 1
+fi
+
+if ! command -v parallel &> /dev/null; then
+    echo "Error: GNU Parallel is not found. To install, type: brew install parallel"
     exit 1
 fi
 
@@ -74,9 +93,17 @@ source "$FREESURFER_HOME/SetUpFreeSurfer.sh"
 # List all subjects in the SUBJECTS dataset
 SUBJECTS=$(ls "$SUBJECTS_DIR" | grep -Eo 'sub-[a-zA-Z0-9]+')
 
+
+echo ""
+echo ""
+echo "----------------------------------------------------------------------------------------"
+
+
 # Display all T1s found
 t1s_found=0
 echo "Found the following T1 images:"
+echo ""
+echo ""
 for subj in $SUBJECTS; do
     for session in ses-01 ses-02 ses-03; do
         T1="${SUBJECTS_DIR}/${subj}/${session}/anat/${subj}_${session}_T1w.nii" #or ending in .nii.g
@@ -96,6 +123,8 @@ done
 
 # Final message with the count
 echo "Total T1s found: $t1s_found"
+echo ""
+echo ""
 
 # Extracting metadata from the T1s
 python3 extract_metadata.py "${t1s_array[@]}"
@@ -103,11 +132,13 @@ python3 extract_metadata.py "${t1s_array[@]}"
 
 
 echo "Checking which T1s have not been processed through freesurfer..."
+echo ""
+echo ""
 t1s_not_processed=()
 t1s_without_montage=()
 
 for subj in $SUBJECTS; do
-    for session in ses-01 ses-02 ses-03; do
+    for session in ses-01 ses-02; do
         T1="${SUBJECTS_DIR}/${subj}/${session}/anat/${subj}_${session}_T1w.nii"
         if [ ! -e "$T1" ]; then
             T1="${SUBJECTS_DIR}/${subj}/${session}/anat/${subj}_${session}_T1w.nii.gz"
@@ -117,8 +148,8 @@ for subj in $SUBJECTS; do
         fi
 
         log_path="${SUBJECTS_DIR}/${subj}/${session}/derivatives/${subj}/scripts/recon-all.log"
-        montage_3d="${SUBJECTS_DIR}/${subj}/${session}/derivatives/${subj}/qa-output/montage-3d.png"
-        montage_2d="${SUBJECTS_DIR}/${subj}/${session}/derivatives/${subj}/qa-output/montage-2d.png"
+        montage_3d="${SUBJECTS_DIR}/${subj}/${session}/derivatives/qa-output/montage-3d.png"
+        montage_2d="${SUBJECTS_DIR}/${subj}/${session}/derivatives/qa-output/montage-2d.png"
 
         if [ ! -f "$log_path" ] || ! grep -q "finished without error" "$log_path"; then
             t1s_not_processed+=("$T1")
@@ -130,7 +161,8 @@ done
 
 echo "Found ${#t1s_not_processed[@]} T1 images that have not been processed through freesurfer."
 echo "Found ${#t1s_without_montage[@]} T1 images without montages."
-
+echo ""
+echo ""
 
 
 
@@ -156,7 +188,10 @@ create_2d_slices() {
     done
     echo "-quit" >> "$cmd_file"
 
+    
     echo "Running freeview"
+    echo ""
+    echo ""
     freeview -v \
         "$sub_path/${session}/derivatives/${subj}/mri/T1.mgz" \
         "$sub_path/${session}/derivatives/${subj}/mri/aparc+aseg.mgz" \
@@ -169,6 +204,8 @@ create_2d_slices() {
         -cmd "$cmd_file"
     
     echo "Creating montage"
+    echo ""
+    echo ""
     magick montage "$output_dir/"frame-2d-*.png -tile 5x8 -geometry +0+0 "$output_dir/montage-2d.png"
 
     rm "$output_dir/"frame-2d-*.png
@@ -197,7 +234,10 @@ create_3d_slices() {
     echo "-ss $output_dir/parc-3d-06-ventral.png" >> "$cmd_file"
     echo "-quit" >> "$cmd_file"
 
+    
     echo "Running freeview"
+    echo ""
+    echo ""
     freeview -v \
         "$sub_path/${session}/derivatives/${subj}/mri/brainmask.mgz" \
         -f "$sub_path/${session}/derivatives/${subj}/surf/lh.pial:annot=aparc.annot:name=pial_aparc:visible=1" \
@@ -205,6 +245,8 @@ create_3d_slices() {
         -cmd "$cmd_file"
     
     echo "Creating montage"
+    echo ""
+    echo ""
     magick montage "$output_dir/"parc-3d-*.png -tile 3x2 -geometry +0+0 "$output_dir/montage-3d.png"
 
     #delete the individual images and only keep the montage
@@ -215,19 +257,25 @@ process_visualization() {
     local subj=$1
     local session=$2
     local sub_path="${SUBJECTS_DIR}/${subj}"
+    local FREESURFER_OUT="${SUBJECTS_DIR}/${subj}/${session}/derivatives"
     local output_dir="${FREESURFER_OUT}/qa-output"
-
+    
     echo "Processing $subj"
     [ ! -d "$output_dir" ] && mkdir -p "$output_dir"
-
+    echo ""
+    echo ""
     echo "Creating 2d slices"
     create_2d_slices "$subj" "$sub_path" "$session" "$output_dir"
-
+    echo ""
+    echo ""
     echo "Creating 3d slices"
     create_3d_slices "$subj" "$sub_path" "$session" "$output_dir"
-    
+    echo ""
+    echo "" 
     # Printing the confirmation at the end
     echo "QA images for $subj printed"
+    echo ""
+    echo ""
 }
 
 process_t1_without_visualization() {
@@ -236,11 +284,14 @@ process_t1_without_visualization() {
     local session=$(echo "$t1_path" | grep -Eo 'ses-[a-zA-Z0-9]+' | head -n1)
     local FREESURFER_OUT="${SUBJECTS_DIR}/${subj}/${session}/derivatives"
     
+    [ ! -d "$FREESURFER_OUT" ] && mkdir -p "$FREESURFER_OUT" 
     if [ -f "$t1_path" ]; then
         recon-all -i "$t1_path" -s "$subj" -all -qcache -sd "$FREESURFER_OUT"
         segmentHA_T1.sh "$subj"
     else
         echo "T1 file not found for $subj"
+        echo ""
+        echo ""
     fi
 }
 export -f process_t1_without_visualization  # Export the function so parallel can use it
@@ -250,9 +301,11 @@ if [ ${#t1s_not_processed[@]} -gt 0 ]; then
     read -p "Do you want to process these images through the cross-sectional pipeline? (yes/no): " PROCEED_CHOICE
     if [[ $PROCEED_CHOICE == "yes" ]]; then
         echo "Starting the cross-sectional pipeline..."
+        echo ""
+        echo ""
 
         # Run the process_t1_without_visualization function in parallel
-        parallel process_t1_without_visualization ::: "${t1s_not_processed[@]}"
+        #parallel process_t1_without_visualization ::: "${t1s_not_processed[@]}" 
 
         # If you wish to limit the number of simultaneous jobs, you can use the -j option with parallel, e.g., parallel -j 4 ... to use 4 cores.
 
@@ -272,13 +325,15 @@ if [ ${#t1s_without_montage[@]} -gt 0 ]; then
     read -p "Do you want to generate montages for these images? (yes/no): " MONTAGE_CHOICE
     if [[ $MONTAGE_CHOICE == "yes" ]]; then
         echo "Generating montages..."
+        echo ""
+        echo ""
 
         for t1_path in "${t1s_without_montage[@]}"; do
             subj=$(echo "$t1_path" | grep -Eo 'sub-[a-zA-Z0-9]+' | head -n1)
             session=$(echo "$t1_path" | grep -Eo 'ses-[a-zA-Z0-9]+' | head -n1)
             FREESURFER_OUT="${SUBJECTS_DIR}/${subj}/${session}/derivatives"
             
-            process_visualization "$subj" "$session"
+            process_visualization "$subj" "$session" 
         done
     fi
 fi
@@ -286,11 +341,43 @@ fi
 # Creating the tables will all the cross-sectional data
 export SUBJECTS_DIR="$SUBJECTS_DIR"
 #create a list of all subjects in $SUBJECTS_DIR that have a stats folder somwhere in their derivatives folder
-list="${SUBJECTS_DIR}/*/*/derivatives/*"
 measures_folder="${SUBJECTS_DIR}/measures"
 if [ ! -d "$measures_folder" ]; then
     mkdir "$measures_folder"
 fi
+
+
+BASE_SUBJECTS_DIR="$SUBJECTS_DIR"
+
+# Check if the user wants to proceed with the longitudinal pipeline
+read -p "Do you want to process through the longitudinal pipeline? (yes/no): " LONGITUDINAL_CHOICE
+
+if [[ $LONGITUDINAL_CHOICE == "yes" ]]; then
+    # Iterate over each subject in the directory
+    for subject_dir in "$BASE_SUBJECTS_DIR"/sub-*; do
+        if [ -d "$subject_dir" ]; then
+            # Update the SUBJECTS_DIR for the current subject
+            SUBJECTS_DIR="$subject_dir"
+            
+            echo "Processing subject: $subject_dir"
+            echo "Starting the longitudinal pipeline..."
+            echo ""
+            echo ""
+            python3 process_longitudinal.py "$SUBJECTS_DIR"
+        fi
+    done
+fi
+
+# Extract the longitudinal data into a csv file and merge it with the cross-sectional data
+
+echo "Extracting longitudinal data into csv files..."
+echo ""
+echo ""
+
+# Assuming you have a specific directory structure for longitudinal data, modify the path accordingly
+list="${BASE_SUBJECTS_DIR}/*/*/derivatives/*"
+list_long="${BASE_SUBJECTS_DIR}/*/*/derivatives/longitudinal/*"
+measures_folder="${BASE_SUBJECTS_DIR}/measures"
 
 
 asegstats2table --subjects $list  --meas volume --skip --statsfile wmparc.stats --all-segs --tablefile $measures_folder/wmparc_stats.csv
@@ -304,23 +391,35 @@ asegstats2table  --subjects $list  --skip --statsfile=hipposubfields.rh.T1.v21.s
 asegstats2table --subjects $list  --skip --statsfile=amygdalar-nuclei.lh.T1.v21.stats --tablefile=$measures_folder/amyg_nuclei_lh.csv
 asegstats2table  --subjects $list  --skip --statsfile=amygdala-nuclei.rh.T1.v21.stats --tablefile=$measures_folder/amyg_nuclei_rh.csv
 
-#find all csv files in $measures_folder
+asegstats2table --subjects $list_long --meas volume --skip --statsfile wmparc.stats --all-segs --tablefile $measures_folder/long_wmparc_stats.csv
+asegstats2table --subjects $list_long   --meas volume --skip --statsfile aseg.stats --all-segs --tablefile $measures_folder/long_aseg_stats.csv
+aparcstats2table --subjects $list_long   --hemi lh --meas volume --skip  --tablefile $measures_folder/long_aparc_volume_lh.csv
+aparcstats2table --subjects $list_long   --hemi lh --meas thickness --skip  --tablefile $measures_folder/long_aparc_thickness_lh.csv
+aparcstats2table --subjects $list_long   --hemi rh --meas volume --skip --tablefile $measures_folder/long_aparc_volume_rh.csv
+aparcstats2table --subjects $list_long   --hemi rh --meas thickness --skip  --tablefile $measures_folder/long_aparc_thickness_rh.csv
+asegstats2table --subjects $list_long   --skip --statsfile=hipposubfields.lh.T1.v21.stats --tablefile=$measures_folder/long_hipposubfields_lh.csv 
+asegstats2table  --subjects $list_long   --skip --statsfile=hipposubfields.rh.T1.v21.stats --tablefile=$measures_folder/long_hipposubfields_rh.csv
+asegstats2table --subjects $list_long   --skip --statsfile=amygdalar-nuclei.lh.T1.v21.stats --tablefile=$measures_folder/long_amyg_nuclei_lh.csv
+asegstats2table  --subjects $list_long   --skip --statsfile=amygdala-nuclei.rh.T1.v21.stats --tablefile=$measures_folder/long_amyg_nuclei_rh.csv
+echo "Done extracting longitudinal data into csv files."
+
+
+# Find all csv files in $measures_folder
 csv_files=$(find $measures_folder -type f -name "*.csv")
 for csv_file in $csv_files; do
     python3 process_csv.py $csv_file
 done
 
-#for all files in $measures_folder, merge them by sub and ses and save them in the same folder as all_measures.csv
+# For all files in $measures_folder, merge them by sub and ses and save them in the same folder as all_measures.csv
 python3 merge_csv.py $measures_folder
+echo ""
+echo ""
+echo ""
+echo ""
+echo "All done, you can close this window now."
+echo ""
+echo ""
+echo ""
+echo ""
 
-echo "Done extracting cross-sectional data into csv files."
 
-# Finally, check if the user wants to proceed with the longitudinal pipeline
-read -p "Do you want to process through the longitudinal pipeline? (yes/no): " LONGITUDINAL_CHOICE
-if [[ $LONGITUDINAL_CHOICE == "yes" ]]; then
-    echo "Starting the longitudinal pipeline..."
-    python3 process_longitudinal.py "$SUBJECTS_DIR"
-else    
-    echo "Exiting."
-    exit 1
-fi
