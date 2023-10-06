@@ -12,8 +12,10 @@ echo "This script will:"
 echo "- Run FreeSurfer's recon-all on all T1 images found in a BIDS dataset."
 echo "- Create a quality control montage of the FreeSurfer output for each subject and session."
 echo "- Extract the metrics into a CSV file."
+echo "- Extract T1 metadata into a CSV file."
 echo "- Run the longitudinal stream if there's more than one session per subject."
 echo ""
+echo "----------------------------------------------------------------------------------------"
 
 echo "Note:"
 echo -e "Make sure your dataset is organized according to the BIDS specification. This entails:\n"
@@ -26,8 +28,8 @@ echo "Also make sure you have the following scripts in your SUBJECTS_DIR path:"
 echo "process_csv.py, merge_csv.py and process_longitudinal.py"
 echo "Do not change the names of these scripts."
 echo ""
-
-
+echo "----------------------------------------------------------------------------------------"
+echo "----------------------------------------------------------------------------------------"
 
 echo -e "If your dataset isn't organized and named correctly, press Ctrl+C to exit."
 echo "Otherwise, press enter to continue."
@@ -272,11 +274,39 @@ fi
 # Creating the tables will all the cross-sectional data
 export SUBJECTS_DIR="$SUBJECTS_DIR"
 #create a list of all subjects in $SUBJECTS_DIR that have a stats folder somwhere in their derivatives folder
-list="${SUBJECTS_DIR}/*/*/derivatives/*"
 measures_folder="${SUBJECTS_DIR}/measures"
 if [ ! -d "$measures_folder" ]; then
     mkdir "$measures_folder"
 fi
+
+
+BASE_SUBJECTS_DIR="$SUBJECTS_DIR"
+
+# Check if the user wants to proceed with the longitudinal pipeline
+read -p "Do you want to process through the longitudinal pipeline? (yes/no): " LONGITUDINAL_CHOICE
+
+if [[ $LONGITUDINAL_CHOICE == "yes" ]]; then
+    # Iterate over each subject in the directory
+    for subject_dir in "$BASE_SUBJECTS_DIR"/sub-*; do
+        if [ -d "$subject_dir" ]; then
+            # Update the SUBJECTS_DIR for the current subject
+            SUBJECTS_DIR="$subject_dir"
+            
+            echo "Processing subject: $subject_dir"
+            echo "Starting the longitudinal pipeline..."
+            python3 process_longitudinal.py "$SUBJECTS_DIR"
+        fi
+    done
+fi
+
+# Extract the longitudinal data into a csv file and merge it with the cross-sectional data
+
+echo "Extracting longitudinal data into csv files..."
+
+# Assuming you have a specific directory structure for longitudinal data, modify the path accordingly
+list="${BASE_SUBJECTS_DIR}/*/*/derivatives/*"
+list_long="${BASE_SUBJECTS_DIR}/*/*/derivatives/longitudinal/*"
+measures_folder="${BASE_SUBJECTS_DIR}/measures"
 
 
 asegstats2table --subjects $list  --meas volume --skip --statsfile wmparc.stats --all-segs --tablefile $measures_folder/wmparc_stats.csv
@@ -290,23 +320,26 @@ asegstats2table  --subjects $list  --skip --statsfile=hipposubfields.rh.T1.v21.s
 asegstats2table --subjects $list  --skip --statsfile=amygdalar-nuclei.lh.T1.v21.stats --tablefile=$measures_folder/amyg_nuclei_lh.csv
 asegstats2table  --subjects $list  --skip --statsfile=amygdala-nuclei.rh.T1.v21.stats --tablefile=$measures_folder/amyg_nuclei_rh.csv
 
-#find all csv files in $measures_folder
+asegstats2table --subjects $list_long --meas volume --skip --statsfile wmparc.stats --all-segs --tablefile $measures_folder/long_wmparc_stats.csv
+asegstats2table --subjects $list_long   --meas volume --skip --statsfile aseg.stats --all-segs --tablefile $measures_folder/long_aseg_stats.csv
+aparcstats2table --subjects $list_long   --hemi lh --meas volume --skip  --tablefile $measures_folder/long_aparc_volume_lh.csv
+aparcstats2table --subjects $list_long   --hemi lh --meas thickness --skip  --tablefile $measures_folder/long_aparc_thickness_lh.csv
+aparcstats2table --subjects $list_long   --hemi rh --meas volume --skip --tablefile $measures_folder/long_aparc_volume_rh.csv
+aparcstats2table --subjects $list_long   --hemi rh --meas thickness --skip  --tablefile $measures_folder/long_aparc_thickness_rh.csv
+asegstats2table --subjects $list_long   --skip --statsfile=hipposubfields.lh.T1.v21.stats --tablefile=$measures_folder/long_hipposubfields_lh.csv 
+asegstats2table  --subjects $list_long   --skip --statsfile=hipposubfields.rh.T1.v21.stats --tablefile=$measures_folder/long_hipposubfields_rh.csv
+asegstats2table --subjects $list_long   --skip --statsfile=amygdalar-nuclei.lh.T1.v21.stats --tablefile=$measures_folder/long_amyg_nuclei_lh.csv
+asegstats2table  --subjects $list_long   --skip --statsfile=amygdala-nuclei.rh.T1.v21.stats --tablefile=$measures_folder/long_amyg_nuclei_rh.csv
+echo "Done extracting longitudinal data into csv files."
+
+
+# Find all csv files in $measures_folder
 csv_files=$(find $measures_folder -type f -name "*.csv")
 for csv_file in $csv_files; do
     python3 process_csv.py $csv_file
 done
 
-#for all files in $measures_folder, merge them by sub and ses and save them in the same folder as all_measures.csv
+# For all files in $measures_folder, merge them by sub and ses and save them in the same folder as all_measures.csv
 python3 merge_csv.py $measures_folder
 
-echo "Done extracting cross-sectional data into csv files."
 
-# Finally, check if the user wants to proceed with the longitudinal pipeline
-read -p "Do you want to process through the longitudinal pipeline? (yes/no): " LONGITUDINAL_CHOICE
-if [[ $LONGITUDINAL_CHOICE == "yes" ]]; then
-    echo "Starting the longitudinal pipeline..."
-    python3 process_longitudinal.py "$SUBJECTS_DIR"
-else    
-    echo "Exiting."
-    exit 1
-fi
