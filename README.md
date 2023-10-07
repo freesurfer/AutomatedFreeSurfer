@@ -18,7 +18,7 @@ Designed for simplicity, users will interact through a series of prompts to navi
 ## Author Information
 - **Name:** Carolina Ferreira-Atuesta 
 - **Date:** September 2023
-- **Email:** cfatuesta@gmail.com
+
 
 
 #### Prerequisites:
