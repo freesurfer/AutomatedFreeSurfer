@@ -78,7 +78,7 @@ By following these prerequisites, you ensure a smooth setup and avoid potential 
 # Instructions:
 
 ## Starting the Main Script:
-1. **Initialization:** Open your terminal or command prompt. Navigate to the directory containing your scripts and data. Execute the `main_script.sh` or `main_script_parallelized.sh` by typing `bash main_script.sh` or bash main_script_parallelized.sh` and pressing Enter.
+1. **Initialization:** Open your terminal or command prompt. Navigate to the directory containing your scripts and data. Execute the `main_script.sh` or `main_script_parallelized.sh` by typing `bash main_script.sh` or `bash main_script_parallelized.sh` and pressing Enter.
 2. **Dataset Validation:** The script first validates the organization and naming conventions of the dataset. If inconsistencies are detected, you can immediately exit the script by pressing `Ctrl+C`. If everything appears in order, you can proceed by pressing Enter.
 
 ## Enter Paths:
