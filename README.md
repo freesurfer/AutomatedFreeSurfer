@@ -90,20 +90,27 @@ By following these prerequisites, you ensure a smooth setup and avoid potential 
 
 ## Processing T1 Images:
 1. **Metadata Extraction:** All detected T1 images are processed to extract metadata from their associated .JSON headers. This metadata is then consolidated into a CSV file named "T1s_metadata.csv" in the working directory.
-2. **Processing Check:** The script searches for T1 images that haven't been processed by Freesurfer. This is done by reading the `recon-all.log` associated with each image.
+   <img width="811" alt="Screenshot 2023-10-07 at 09 33 45" src="https://github.com/cfatuesta/AutomatedFreeSurfer/assets/42354106/0f4128de-c5b0-40c3-84f9-d49da389b076">
+
+3. **Processing Check:** The script searches for T1 images that haven't been processed by Freesurfer. This is done by reading the `recon-all.log` associated with each image.
     - If the log states "finished without error", that specific image is considered already processed and thus, is skipped.
     - If there's no log or if the log states "finished with errors", the image will be selected for further processing.
-3. **Processing Confirmation:** After identifying all unprocessed images, you will be asked whether you'd like to continue processing them using the cross-sectional pipeline. Type `yes` to proceed.
-4. ❗️ **Important Note:** If you have T1 images processed by Freesurfer but stored in different directories, you must move them to their respective subject directories in the main dataset. Ensure you relocate the `log` folder and its contents, as the scripts utilize these logs for decision-making.
+4. **Processing Confirmation:** After identifying all unprocessed images, you will be asked whether you'd like to continue processing them using the cross-sectional pipeline. Type `yes` to proceed.
+5. ❗️ **Important Note:** If you have T1 images processed by Freesurfer but stored in different directories, you must move them to their respective subject directories in the main dataset. Ensure you relocate the `log` folder and its contents, as the scripts utilize these logs for decision-making.
 
 ## Generating Montages:
 1. **Montage Creation:** For T1 images lacking visual montages, the script will propose generating these montages. Confirm by typing `yes`.
 2. **Montage Types:** Two distinct montages will be created for each subject/session:
     - **3D Montage:** Showcasing three-dimensional aspects of the imaging.
+      ![montage-3d](https://github.com/cfatuesta/AutomatedFreeSurfer/assets/42354106/2a2266b6-e7c1-419d-ba85-cdd8499be334)
     - **2D Montage:** Providing two-dimensional slices for detailed examination.
+      ![montage-2d](https://github.com/cfatuesta/AutomatedFreeSurfer/assets/42354106/26d51497-8489-4618-a81d-91ab0483dac7)
+      
 
 ## Tables Creation:
 1. **Data Compilation:** The script organizes and tabulates the cross-sectional and, if present, longitudinal data. This structured data is then saved for future analysis and referencing.
+   
+<img width="942" alt="Screenshot 2023-10-07 at 09 32 48" src="https://github.com/cfatuesta/AutomatedFreeSurfer/assets/42354106/72973e2f-94ec-4e9a-809a-f6daa696d830">
 
 ## Longitudinal Stream:
 1. **Session Check:** The script evaluates if subjects have more than one processed session.
