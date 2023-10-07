@@ -1,4 +1,4 @@
-# Neuroimaging Data Processing Suite
+# AutomatedFreeSurfer
 
 ## Description
 These scripts are tailored to process T1 images in a BIDS-formatted dataset using FreeSurfer's `recon-all` and the hippocampal and amygdala subfields segmentation stream. It automates the tasks of creating a quality control montage of the FreeSurfer output for each subject and session, and extracting the metrics into a CSV file. The suite provides the added capability of running the longitudinal stream when more than one session per subject is present.
