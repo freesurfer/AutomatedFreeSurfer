@@ -11,7 +11,7 @@ Designed for simplicity, users will interact through a series of prompts to navi
 2. [Prerequisites](#prerequisites)
 3. [Instructions](#instructions)
 4. [Scripts Overview](#scripts-overview)
-5. [Usage for Dummies](#usage-for-dummies)
+5. [Steps-by-Step Guide](#step-by-step)
 6. [Troubleshooting](#troubleshooting)
 7. [Contact](#contact)
 
@@ -21,7 +21,7 @@ Designed for simplicity, users will interact through a series of prompts to navi
 
 
 
-#### Prerequisites:
+#### Prerequisites
 
 1. **BIDS Dataset**: Your dataset must be organized according to the [BIDS specification](https://bids.neuroimaging.io/), ensuring correctly named main directory and subdirectories.
    ![Image 18-09-2023 at 07 47](https://github.com/cfatuesta/ENIGMA/assets/42354106/2b7a68fc-4eb7-4d45-9283-e2142f4b0859)
@@ -75,20 +75,20 @@ Designed for simplicity, users will interact through a series of prompts to navi
 
 By following these prerequisites, you ensure a smooth setup and avoid potential issues during execution. Make sure to follow the checks and installation steps accordingly.
 
-# Instructions:
+# Instructions
 
-## Starting the Main Script:
+## Starting the Main Script
 1. **Initialization:** Open your terminal or command prompt. Navigate to the directory containing your scripts and data. Execute the `main_script.sh` or `main_script_parallelized.sh` by typing `bash main_script.sh` or `bash main_script_parallelized.sh` and pressing Enter.
 2. **Dataset Validation:** The script first validates the organization and naming conventions of the dataset. If inconsistencies are detected, you can immediately exit the script by pressing `Ctrl+C`. If everything appears in order, you can proceed by pressing Enter.
 
-## Enter Paths:
+## Enter Paths
 1. **Directory Check:** The script checks if environment variables `SUBJECTS_DIR` and `FREESURFER_HOME` are set. 
     - If they are not set, you will be prompted to manually provide the paths:
         - `SUBJECTS_DIR`: The directory where your subjects' data is.
         - `FREESURFER_HOME`: The installation directory of Freesurfer.
     - If they are set, the paths will be displayed for confirmation. You can choose to continue with these paths or provide alternate ones.
 
-## Processing T1 Images:
+## Processing T1 Images
 1. **Metadata Extraction:** All detected T1 images are processed to extract metadata from their associated .JSON headers. This metadata is then consolidated into a CSV file named "T1s_metadata.csv" in the working directory.
    <img width="811" alt="Screenshot 2023-10-07 at 09 33 45" src="https://github.com/cfatuesta/AutomatedFreeSurfer/assets/42354106/0f4128de-c5b0-40c3-84f9-d49da389b076">
 
@@ -98,7 +98,7 @@ By following these prerequisites, you ensure a smooth setup and avoid potential 
 4. **Processing Confirmation:** After identifying all unprocessed images, you will be asked whether you'd like to continue processing them using the cross-sectional pipeline. Type `yes` to proceed.
 5. ❗️ **Important Note:** If you have T1 images processed by Freesurfer but stored in different directories, you must move them to their respective subject directories in the main dataset. Ensure you relocate the `log` folder and its contents, as the scripts utilize these logs for decision-making.
 
-## Generating Montages:
+## Generating Montages
 1. **Montage Creation:** For T1 images lacking visual montages, the script will propose generating these montages. Confirm by typing `yes`.
 2. **Montage Types:** Two distinct montages will be created for each subject/session:
     - **3D Montage:** Showcasing three-dimensional aspects of the imaging.
@@ -107,22 +107,21 @@ By following these prerequisites, you ensure a smooth setup and avoid potential 
       ![montage-2d](https://github.com/cfatuesta/AutomatedFreeSurfer/assets/42354106/26d51497-8489-4618-a81d-91ab0483dac7)
       
 
-## Tables Creation:
+## Tables Creation
 1. **Data Compilation:** The script organizes and tabulates the cross-sectional and, if present, longitudinal data. This structured data is then saved for future analysis and referencing.
    
 <img width="942" alt="Screenshot 2023-10-07 at 09 32 48" src="https://github.com/cfatuesta/AutomatedFreeSurfer/assets/42354106/72973e2f-94ec-4e9a-809a-f6daa696d830">
 
-## Longitudinal Stream:
+## Longitudinal Stream
 1. **Session Check:** The script evaluates if subjects have more than one processed session.
 2. **Pipeline Activation:** If multi-session criteria are met, the script activates Freesurfer's longitudinal pipeline, systematically creating new directories for every output stage, namely: base, time 1, and time 2.
 
-# Scripts Details:
+# Scripts Details
 
-
-## Main Script (Parallelized):
+## Main Script (Parallelized)
 - **`main_script_parallelized.sh`:** This script functions similarly to `main_script.sh` but is optimized to handle parallel processing. This enables faster processing of multiple images by distributing the tasks across available computational resources. Especially handy for large datasets, this script reduces the time required for processing without compromising on the output's quality.
 
-## Main Script (Regular):
+## Main Script (Regular)
 - **`main_script.sh`:** This script, as described above, provides a sequential approach to process the T1 images. It is designed to be more straightforward and is suitable for datasets of a moderate size or when computational resources are limited.
 
 The following scripts are part of both the main_script and main_script_parallelized:
@@ -136,7 +135,7 @@ Remember to adjust your script's execution based on the desired mode: paralleliz
 
 ---
 
-## New to programming? Here's a step-by-step guide on how to run these scripts:
+## New to programming? Here's a step-by-step guide on how to run these scripts
 
 1. **Setup:** Download the scripts `main_script.sh` (or `main_main_parallelized.sh`), `process_csv.py`, `merge_csv.py`, `extract_metadata.py`, and `process_longitudinal.py` from this repository.
 2. Move these scripts into your primary BIDS dataset directory, where your subjects' folders are located.
@@ -145,30 +144,21 @@ Remember to adjust your script's execution based on the desired mode: paralleliz
 5. Type `bash main_script.sh` or `bash main_script_parallelized.sh` and hit Enter.
 6. Follow the on-screen instructions and provide inputs as prompted.
 
-## Troubleshooting
 
-- If commands like `freeview` or `magick` are not found, follow the error message suggestions.
-- Double-check entered paths if you get directory-related errors. Ensure your dataset adheres to the BIDS specification.
-
-## Contact
-
-For queries or troubleshooting, reach out to Carolina Ferreira-Atuesta at cfatuesta@gmail.com. Always ensure to back up your data before using these scripts.
-
-
-#### Output:
+#### Output
 - **Quality Control Montage:** For each subject and session, a visual quality check is provided through montages generated from Freesurfer's outputs.
 - **Freesurfer Metrics:** Detailed metrics obtained from Freesurfer processing are saved as a CSV file.
 - **Longitudinal Data Stream:** For subjects with more than one session, additional longitudinal data is processed and stored.
 - **T1 Metadata:** Metadata associated with each unique T1 image is extracted and compiled into a dedicated CSV file.
 
-#### Best Practices:
+#### Best Practices
 - **Script Names:** Ensure that you keep the original names of all the required scripts within your `SUBJECTS_DIR` path.
 - **Path Accuracy:** Always verify that the paths you've set or entered are correct before executing the scripts. Incorrect paths can trigger errors.
 - **Dataset Organization:** Your dataset should be in order and correctly named. Always ensure it's structured according to the BIDS specification.
 
-#### Troubleshooting:
+#### Troubleshooting
 - **Command Issues:** If you find the `freeview` or `magick` commands unrecognized, refer to the provided error message's instructions to troubleshoot.
 - **Path-Related Errors:** If you input paths that either don't exist or aren't directories, you'll receive an error message, causing the script to terminate. Always double-check your paths before retrying.
 
-#### Contact:
+#### Contact
 For any issues or inquiries about the scripts, reach out to Carolina Ferreira-Atuesta at cfatuesta@gmail.com.
