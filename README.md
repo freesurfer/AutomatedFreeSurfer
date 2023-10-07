@@ -116,12 +116,12 @@ By following these prerequisites, you ensure a smooth setup and avoid potential 
 1. **Session Check:** The script evaluates if subjects have more than one processed session.
 2. **Pipeline Activation:** If multi-session criteria are met, the script activates Freesurfer's longitudinal pipeline, systematically creating new directories for every output stage, namely: base, time 1, and time 2.
 
-# Scripts Details
+## Scripts Details
 
-## Main Script (Parallelized)
+### Main Script (Parallelized)
 - **`main_script_parallelized.sh`:** This script functions similarly to `main_script.sh` but is optimized to handle parallel processing. This enables faster processing of multiple images by distributing the tasks across available computational resources. Especially handy for large datasets, this script reduces the time required for processing without compromising on the output's quality.
 
-## Main Script (Regular)
+### Main Script (Regular)
 - **`main_script.sh`:** This script, as described above, provides a sequential approach to process the T1 images. It is designed to be more straightforward and is suitable for datasets of a moderate size or when computational resources are limited.
 
 The following scripts are part of both the main_script and main_script_parallelized:
@@ -133,9 +133,8 @@ The following scripts are part of both the main_script and main_script_paralleli
 
 Remember to adjust your script's execution based on the desired mode: parallelized or regular. Depending on the size and complexity of your dataset and available computational resources, choose the script that aligns best with your needs.
 
----
 
-## New to programming? Here's a step-by-step guide on how to run these scripts
+### New to programming? Here's a step-by-step guide on how to run these scripts
 
 1. **Setup:** Download the scripts `main_script.sh` (or `main_main_parallelized.sh`), `process_csv.py`, `merge_csv.py`, `extract_metadata.py`, and `process_longitudinal.py` from this repository.
 2. Move these scripts into your primary BIDS dataset directory, where your subjects' folders are located.
@@ -145,20 +144,20 @@ Remember to adjust your script's execution based on the desired mode: paralleliz
 6. Follow the on-screen instructions and provide inputs as prompted.
 
 
-#### Output
+## Output
 - **Quality Control Montage:** For each subject and session, a visual quality check is provided through montages generated from Freesurfer's outputs.
 - **Freesurfer Metrics:** Detailed metrics obtained from Freesurfer processing are saved as a CSV file.
 - **Longitudinal Data Stream:** For subjects with more than one session, additional longitudinal data is processed and stored.
 - **T1 Metadata:** Metadata associated with each unique T1 image is extracted and compiled into a dedicated CSV file.
 
-#### Best Practices
+## Best Practices
 - **Script Names:** Ensure that you keep the original names of all the required scripts within your `SUBJECTS_DIR` path.
 - **Path Accuracy:** Always verify that the paths you've set or entered are correct before executing the scripts. Incorrect paths can trigger errors.
 - **Dataset Organization:** Your dataset should be in order and correctly named. Always ensure it's structured according to the BIDS specification.
 
-#### Troubleshooting
+## Troubleshooting
 - **Command Issues:** If you find the `freeview` or `magick` commands unrecognized, refer to the provided error message's instructions to troubleshoot.
 - **Path-Related Errors:** If you input paths that either don't exist or aren't directories, you'll receive an error message, causing the script to terminate. Always double-check your paths before retrying.
 
-#### Contact
+## Contact
 For any issues or inquiries about the scripts, reach out to Carolina Ferreira-Atuesta at cfatuesta@gmail.com.
