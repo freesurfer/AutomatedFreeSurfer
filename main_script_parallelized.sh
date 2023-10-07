@@ -305,7 +305,7 @@ if [ ${#t1s_not_processed[@]} -gt 0 ]; then
         echo ""
 
         # Run the process_t1_without_visualization function in parallel
-        #parallel process_t1_without_visualization ::: "${t1s_not_processed[@]}" 
+        parallel process_t1_without_visualization ::: "${t1s_not_processed[@]}" 
 
         # If you wish to limit the number of simultaneous jobs, you can use the -j option with parallel, e.g., parallel -j 4 ... to use 4 cores.
 
