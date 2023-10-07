@@ -1,9 +1,9 @@
 # AutomatedFreeSurfer
 
 ## Description
-These scripts are tailored to process T1 images in a BIDS-formatted dataset using FreeSurfer's `recon-all` and the hippocampal and amygdala subfields segmentation stream. It automates the tasks of creating a quality control montage of the FreeSurfer output for each subject and session, and extracting the metrics into a CSV file. The suite provides the added capability of running the longitudinal stream when more than one session per subject is present.
+These scripts are tailored to process T1 images in a BIDS-formatted dataset using FreeSurfer's `recon-all` and the hippocampal and amygdala subfields segmentation stream with minimal (really, minimal) user input. It automates the tasks of creating a quality control montage of the FreeSurfer output for each subject and session, and extracting the metrics into a CSV file. The suite provides the added capability of running the longitudinal stream when more than one session per subject is present (also with minimal user input)
 
-Designed for simplicity, users will interact through a series of prompts to navigate specific processes. Ensure that all scripts are downloaded from this repository and saved in your BIDS folder alongside your subjects' directories.
+Designed for simplicity, users will interact through a series of prompts to navigate specific processes. Apart from setting some paths, no additional programming is required, the pipeline takes care of it. Ensure that all scripts are downloaded from this repository and saved in your BIDS folder alongside your subjects' directories.
 
 ## Table of Contents
 
