@@ -249,7 +249,7 @@ create_3d_slices() {
     echo ""
     magick montage "$output_dir/"parc-3d-*.png -tile 3x2 -geometry +0+0 "$output_dir/montage-3d.png"
 
-    #delete the individual images and only keep the montage
+    # Delete the individual images and only keep the montage
     rm "$output_dir/"parc-3d-*.png
 }
 
@@ -340,7 +340,7 @@ fi
 
 # Creating the tables will all the cross-sectional data
 export SUBJECTS_DIR="$SUBJECTS_DIR"
-#create a list of all subjects in $SUBJECTS_DIR that have a stats folder somwhere in their derivatives folder
+# Create a list of all subjects in $SUBJECTS_DIR that have a stats folder
 measures_folder="${SUBJECTS_DIR}/measures"
 if [ ! -d "$measures_folder" ]; then
     mkdir "$measures_folder"
