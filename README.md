@@ -144,20 +144,20 @@ Remember to adjust your script's execution based on the desired mode: paralleliz
 6. Follow the on-screen instructions and provide inputs as prompted.
 
 
-## Output
+# Output
 - **Quality Control Montage:** For each subject and session, a visual quality check is provided through montages generated from Freesurfer's outputs.
 - **Freesurfer Metrics:** Detailed metrics obtained from Freesurfer processing are saved as a CSV file.
 - **Longitudinal Data Stream:** For subjects with more than one session, additional longitudinal data is processed and stored.
 - **T1 Metadata:** Metadata associated with each unique T1 image is extracted and compiled into a dedicated CSV file.
 
-## Best Practices
+# Best Practices
 - **Script Names:** Ensure that you keep the original names of all the required scripts within your `SUBJECTS_DIR` path.
 - **Path Accuracy:** Always verify that the paths you've set or entered are correct before executing the scripts. Incorrect paths can trigger errors.
 - **Dataset Organization:** Your dataset should be in order and correctly named. Always ensure it's structured according to the BIDS specification.
 
-## Troubleshooting
+# Troubleshooting
 - **Command Issues:** If you find the `freeview` or `magick` commands unrecognized, refer to the provided error message's instructions to troubleshoot.
 - **Path-Related Errors:** If you input paths that either don't exist or aren't directories, you'll receive an error message, causing the script to terminate. Always double-check your paths before retrying.
 
-## Contact
+# Contact
 For any issues or inquiries about the scripts, reach out to Carolina Ferreira-Atuesta at cfatuesta@gmail.com.
