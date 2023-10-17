@@ -376,7 +376,35 @@ if [[ $LONGITUDINAL_CHOICE == "yes" ]]; then
     parallel -j+0 "python3 process_longitudinal.py {}" ::: "${subjects[@]}"
 fi
 
-# Extract the longitudinal data into a csv file and merge it with the cross-sectional data
+
+# Define paths for longitudinal outputs
+log_path_long="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal/${subj}/scripts/recon-all.log"
+montage_3d_long="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal/qa-output/montage-3d.png"
+montage_2d_long="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal/qa-output/montage-2d.png"
+
+# Create an empty array to keep track of T1s without longitudinal montages
+t1s_without_montage_long=()
+
+# Checking which T1s have not been processed through the longitudinal pipeline
+for subj in $SUBJECTS; do
+    for session in ses-01 ses-02; do
+        # ... [adapt the path for T1 in the longitudinal directory, if different]
+        if [ ! -f "$log_path_long" ] || ! grep -q "finished without error" "$log_path_long"; then
+            continue
+        elif [ ! -f "$montage_3d_long" ] || [ ! -f "$montage_2d_long" ]; then
+            t1s_without_montage_long+=("$T1")
+        fi
+    done
+done
+
+# Process montages for the longitudinal output
+for t1_path in "${t1s_without_montage_long[@]}"; do
+    subj=$(echo "$t1_path" | grep -Eo 'sub-[a-zA-Z0-9]+' | head -n1)
+    session=$(echo "$t1_path" | grep -Eo 'ses-[a-zA-Z0-9]+' | head -n1)
+    FREESURFER_OUT_LONG="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal"
+    
+    process_visualization "$subj" "$session" 
+done
 
 echo "Extracting longitudinal data into csv files..."
 echo ""
