@@ -89,31 +89,28 @@ def cleanup_and_move_files(SUBJECTS_DIR, subject):
                     shutil.move(folder_path, target_dir)
 
 
-def process_longitudinal(SUBJECTS_DIR):
-    for subject in os.listdir(SUBJECTS_DIR):
-        # Check that the subject is a folder and the name has "sub-" in it
-        subject_dir = os.path.join(SUBJECTS_DIR, subject)
-        if not os.path.isdir(subject_dir) or 'sub-' not in subject:
-            continue
+def process_longitudinal(subject_dir, SUBJECTS_DIR):
+    # Extract the subject name
+    subject = os.path.basename(subject_dir)
 
-        # If subject_dir has a subfolder called ses-01 and ses-02 and both have a derivatives folder, then run the longitudinal pipeline
-        ses_01_output = os.path.exists(os.path.join(subject_dir, "ses-1", "derivatives", subject))
-        ses_02_output = os.path.exists(os.path.join(subject_dir, "ses-2", "derivatives", subject))
+    # If subject_dir has a subfolder called ses-01 and ses-02 and both have a derivatives folder, then run the longitudinal pipeline
+    ses_01_output = os.path.exists(os.path.join(subject_dir, "ses-1", "derivatives", subject))
+    ses_02_output = os.path.exists(os.path.join(subject_dir, "ses-2", "derivatives", subject))
 
-        if ses_01_output and ses_02_output:
-            run_longitudinal_pipeline(subject, SUBJECTS_DIR)
-            cleanup_and_move_files(SUBJECTS_DIR, subject)
-        else:
-            print(f"Scans for {subject} have not been processed through freesurfer. Skipping longitudinal pipeline.")
+    if ses_01_output and ses_02_output:
+        run_longitudinal_pipeline(subject, SUBJECTS_DIR)
+        cleanup_and_move_files(SUBJECTS_DIR, subject)
+    else:
+        print(f"Scans for {subject} have not been processed through freesurfer. Skipping longitudinal pipeline.")
 
 if __name__ == '__main__':
-    import sys
     if len(sys.argv) < 2:
         print("Usage: python process_longitudinal.py <SUBJECTS_DIR>")
         sys.exit(1)
 
-    SUBJECTS_DIR = sys.argv[1]
-    process_longitudinal(SUBJECTS_DIR)
-    
+    # Accept specific subject directory as an argument
+    subject_dir = sys.argv[1]
+    # Extract the main SUBJECTS_DIR from the specific subject directory
+    SUBJECTS_DIR = os.path.dirname(subject_dir)
 
-
+    process_longitudinal(subject_dir, SUBJECTS_DIR)
