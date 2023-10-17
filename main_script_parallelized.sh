@@ -349,23 +349,31 @@ fi
 
 BASE_SUBJECTS_DIR="$SUBJECTS_DIR"
 
-# Check if the user wants to proceed with the longitudinal pipeline
-read -p "Do you want to process through the longitudinal pipeline? (yes/no): " LONGITUDINAL_CHOICE
-
-if [[ $LONGITUDINAL_CHOICE == "yes" ]]; then
-    # Iterate over each subject in the directory
-    for subject_dir in "$BASE_SUBJECTS_DIR"/sub-*; do
-        if [ -d "$subject_dir" ]; then
-            # Update the SUBJECTS_DIR for the current subject
-            SUBJECTS_DIR="$subject_dir"
-            
-            echo "Processing subject: $subject_dir"
-            echo "Starting the longitudinal pipeline..."
-            echo ""
-            echo ""
-            python3 process_longitudinal.py "$SUBJECTS_DIR"
+# Function to check if the subject has already been processed
+is_already_processed() {
+    local subject_dir="$1"
+    local log_files=("$subject_dir"/*/*/derivatives/longitudinal/*/scripts/recon-all.log)
+    for log_file in "${log_files[@]}"; do
+        if [[ -f "$log_file" && $(grep -c "finished without error" "$log_file") -gt 0 ]]; then
+            return 0
         fi
     done
+    return 1
+}
+
+# Check if the user wants to proceed with the longitudinal pipeline
+read -p "Do you want to process through the longitudinal pipeline? (yes/no): " LONGITUDINAL_CHOICE
+if [[ $LONGITUDINAL_CHOICE == "yes" ]]; then
+    # Collect subjects which haven't been processed yet
+    subjects=()
+    for subject_dir in "$BASE_SUBJECTS_DIR"/sub-*; do
+        if [ -d "$subject_dir" ] && ! is_already_processed "$subject_dir"; then
+            subjects+=("$subject_dir")
+        fi
+    done
+    
+    # Use parallel to run each subject on a different core and generate the montages
+    parallel -j+0 "python3 process_longitudinal.py {}" ::: "${subjects[@]}"
 fi
 
 # Extract the longitudinal data into a csv file and merge it with the cross-sectional data
