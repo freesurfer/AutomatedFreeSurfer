@@ -382,13 +382,13 @@ log_path_long="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal/${sub
 montage_3d_long="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal/qa-output/montage-3d.png"
 montage_2d_long="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal/qa-output/montage-2d.png"
 
+
 # Create an empty array to keep track of T1s without longitudinal montages
 t1s_without_montage_long=()
 
 # Checking which T1s have not been processed through the longitudinal pipeline
 for subj in $SUBJECTS; do
     for session in ses-01 ses-02; do
-        # ... [adapt the path for T1 in the longitudinal directory, if different]
         if [ ! -f "$log_path_long" ] || ! grep -q "finished without error" "$log_path_long"; then
             continue
         elif [ ! -f "$montage_3d_long" ] || [ ! -f "$montage_2d_long" ]; then
