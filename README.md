@@ -142,6 +142,7 @@ Remember to adjust your script's execution based on the desired mode: paralleliz
 1. **Setup:** Download the scripts `main_script.sh` (or `main_main_parallelized.sh`), `process_csv.py`, `merge_csv.py`, `extract_metadata.py`, and `process_longitudinal.py` from this repository.
 2. Move these scripts into your primary BIDS dataset directory, where your subjects' folders are located.
 <img width="494" alt="Screenshot 2023-10-19 at 3 07 14 PM" src="https://github.com/cfatuesta/AutomatedFreeSurfer/assets/42354106/40be8f00-8dd9-4ab0-b45e-a06a1f580184">
+
 3. Open the terminal (or command prompt).
 4. Navigate to your BIDS directory using `cd path/to/your/BIDS/directory`.
 5. Type `bash main_script.sh` or `bash main_script_parallelized.sh` and hit Enter.
