@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Ferreira-Atuesta"
+  given-names: "Carolina"
+  orcid: "https://orcid.org/0000-0003-0853-7163"
+- family-names: "Terziev"
+  given-names: "Robert"
+- family-names: "Marr"
+  given-names: "Harry"
+- family-names: "Galovic"
+  given-names: "Marian"
+  
+title: "AutomatedFreeSurfer"
+version: 1.0
+date-released: 2023-10-20
+url: "https://github.com/cfatuesta/AutomatedFreeSurfer/tree/main"
