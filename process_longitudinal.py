@@ -1,6 +1,7 @@
 import os
 import subprocess
 import shutil
+import sys
      
 
 def run_longitudinal_pipeline(long_sub, SUBJECTS_DIR):
