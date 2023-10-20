@@ -15,9 +15,8 @@ Designed for simplicity, users will interact through a series of prompts to navi
 6. [Troubleshooting](#troubleshooting)
 7. [Contact](#contact)
 
-## Author Information
-- **Name:** Carolina Ferreira-Atuesta 
-- **Date:** September 2023
+## Citation
+- Ferreira-Atuesta, C., Terziev, R., Marr, H., & Galovic, M. (2023). AutomatedFreeSurfer (Version 1.0) [Computer software]. https://github.com/cfatuesta/AutomatedFreeSurfer/tree/main
 
 
 
