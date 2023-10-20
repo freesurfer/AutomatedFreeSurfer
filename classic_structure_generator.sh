@@ -39,7 +39,7 @@ fi
 # Generate symlinks for Freesurfer outputs
 for subject in $SUBJECTS; do
     for session in "ses-01" "ses-02"; do
-        source_path="${SUBJECTS_DIR}/${subject}/${session}/derivatives/${subject}"
+        source_path="${SUBJECTS_DIR}/${subject}/${session}/anat"
         symlink_path="${classic_structure_dir}/${subject}_${session}"
         
         if [ -d "${source_path}" ]; then
