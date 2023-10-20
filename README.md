@@ -15,12 +15,12 @@ Designed for simplicity, users will interact through a series of prompts to navi
 6. [Troubleshooting](#troubleshooting)
 7. [Contact](#contact)
 
-## Citation
+### Citation
 - Ferreira-Atuesta, C., Terziev, R., Marr, H., & Galovic, M. (2023). AutomatedFreeSurfer (Version 1.0) [Computer software]. https://github.com/cfatuesta/AutomatedFreeSurfer/tree/main
 
 
 
-#### Prerequisites
+### Prerequisites
 
 1. **BIDS Dataset**: Your dataset must be organized according to the [BIDS specification](https://bids.neuroimaging.io/), ensuring correctly named main directory and subdirectories. Here's an example of how it should look like:
      <img width="1232" alt="Screenshot 2023-10-19 at 3 01 07 PM" src="https://github.com/cfatuesta/AutomatedFreeSurfer/assets/42354106/ae08346e-0fe4-4014-a8c4-862b544e7092">
