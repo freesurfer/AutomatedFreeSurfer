@@ -2,116 +2,125 @@ import os
 import subprocess
 import shutil
 import sys
-     
 
-def run_longitudinal_pipeline(long_sub, SUBJECTS_DIR):
+
+def create_symlinks(subject, base_path):
+    """Create symlinks for ses-01 and ses-02 directories."""
+    target_ses01 = os.path.join(base_path, subject, "ses-01", "derivatives", subject)
+    target_ses02 = os.path.join(base_path, subject, "ses-02", "derivatives", subject)
+
+    symlink_ses01 = os.path.join(base_path, subject, subject + "_ses-01")
+    symlink_ses02 = os.path.join(base_path, subject, subject + "_ses-02")
+
+    os.symlink(target_ses01, symlink_ses01)
+    os.symlink(target_ses02, symlink_ses02)
+
+
+def run_longitudinal_pipeline(subject, base_path):
     """Run the longitudinal pipeline for a given subject."""
-    
-    print(f"Creating base for {long_sub}")
+    print(f"Creating base for {subject}")
 
-    # Running the base command
     base_cmd = [
-        "recon-all", "-base", os.path.join(base_dir, f"{long_sub}_base"),
-        "-tp", os.path.join(SUBJECTS_DIR, long_sub, "ses-1", "derivatives", long_sub),
-        "-tp", os.path.join(SUBJECTS_DIR, long_sub, "ses-2", "derivatives", long_sub),
-        "-all", "-sd", os.path.join(SUBJECTS_DIR, long_sub)
+        "recon-all",
+        "-base",
+        os.path.join(base_path, f"{subject}_base"),
+        "-tp",
+        os.path.join(base_path, subject, subject + "_ses-01"),
+        "-tp",
+        os.path.join(base_path, subject, subject + "_ses-02"),
+        "-all",
+        "-sd",
+        os.path.join(base_path, subject),
     ]
+
     result = subprocess.run(base_cmd)
-    
     if result.returncode != 0:
-        print(f"Error with recon-all for {long_sub}")
+        print(f"Error with recon-all for {subject}")
         exit(1)
 
-    # Create a copy of the base folder in ses-2/derivatives
-    print(f"Copying base for {long_sub} ses-2")
-    base_dir = os.path.join(SUBJECTS_DIR, long_sub, "ses-1", "derivatives", long_sub + "_base")
-    ses2_dir = os.path.join(SUBJECTS_DIR, long_sub, "ses-2", "derivatives")
-    result = subprocess.run(["cp", "-r", base_dir, ses2_dir])
-
-    
-    # Running the longitudinal pipeline for ses-1
-    print(f"Running longitudinal pipeline for {long_sub} ses-1")
-    base_dir = os.path.join(SUBJECTS_DIR, long_sub, long_sub + "_base")
-
-    long_cmd_ses1 = [
-        "recon-all", "-long", os.path.join(SUBJECTS_DIR, long_sub, "ses-1", "derivatives", long_sub),  base_dir,  "-all", "-sd", os.path.join(SUBJECTS_DIR, long_sub, "ses-1", "derivatives")
-    ]
-    print(long_cmd_ses1)
-    
-    result = subprocess.run(long_cmd_ses1)
-    
-    if result.returncode != 0:
-        print(f"Error with recon-all for {long_sub}")
-        exit(1)
-    
-    # Running the longitudinal pipeline for ses-2
-    print(f"Running longitudinal pipeline for {long_sub} ses-2")
-    base_dir = os.path.join(SUBJECTS_DIR, long_sub, long_sub + "_base")
-
-    long_cmd_ses2 = [
-        "recon-all", "-long", os.path.join(SUBJECTS_DIR, long_sub, "ses-2", "derivatives", long_sub),  base_dir,  "-all", "-sd", os.path.join(SUBJECTS_DIR, long_sub, "ses-2", "derivatives")
-    ]
-    result = subprocess.run(long_cmd_ses2)
-    
-    if result.returncode != 0:
-        print(f"Error with recon-all for {long_sub}")
-        exit(1)
+    # Continue with the rest of the pipeline for ses-01 and ses-02 using the symlinks
+    for session in ["ses-01", "ses-02"]:
+        print(f"Running longitudinal pipeline for {subject} {session}")
+        long_cmd = [
+            "recon-all",
+            "-long",
+            os.path.join(base_path, subject, subject + "_" + session),
+            os.path.join(base_path, subject, subject + "_base"),
+            "-all",
+            "-sd",
+            os.path.join(base_path, subject),
+        ]
+        result = subprocess.run(long_cmd)
+        if result.returncode != 0:
+            print(f"Error with recon-all for {subject} {session}")
+            exit(1)
 
 
-def cleanup_and_move_files(SUBJECTS_DIR, subject):
+def cleanup_and_move_files(subject, base_path):
     """
     Delete the created symlinks and move the newly generated folders
     based on the naming conventions to the respective session/derivatives/longitudinal.
     """
-    # Define symlinks paths
-    symlink_ses_01_path = os.path.join(SUBJECTS_DIR, subject + "_ses-01")
-    symlink_ses_02_path = os.path.join(SUBJECTS_DIR, subject + "_ses-02")
-    
+    symlink_ses01_path = os.path.join(base_path, subject, subject + "_ses-01")
+    symlink_ses02_path = os.path.join(base_path, subject, subject + "_ses-02")
+
     # Delete symlinks if they exist
-    if os.path.islink(symlink_ses_01_path):
-        os.unlink(symlink_ses_01_path)
-    if os.path.islink(symlink_ses_02_path):
-        os.unlink(symlink_ses_02_path)
-    
-    # Go through folders in the SUBJECTS_DIR and move based on the naming conventions
-    for folder in os.listdir(SUBJECTS_DIR):
-        # Define the full path of the folder
-        folder_path = os.path.join(SUBJECTS_DIR, folder)
-        
-        # Check if it's a directory
+    if os.path.islink(symlink_ses01_path):
+        os.unlink(symlink_ses01_path)
+    if os.path.islink(symlink_ses02_path):
+        os.unlink(symlink_ses02_path)
+
+    # Go through folders in the base_path and move based on the naming conventions
+
+    # Go to subject folder
+
+    for folder in os.listdir(os.path.join(base_path, subject)):
+        print("folder", folder)
+        folder_path = os.path.join(base_path, subject, folder)
+
         if os.path.isdir(folder_path):
-            if "_ses-01" in folder or "_ses-02" in folder:
-                if ".long." in folder:
-                    target_dir = os.path.join(SUBJECTS_DIR, folder.split("_")[1], "derivatives", "longitudinal")
+            print("folder_path", folder_path)
+            # if folder name contains "long" and "ses-01" or "ses-02"
+            if ".long." in folder and ("_ses-01" in folder or "_ses-02" in folder):
+                # if folder name has "ses-01", move the contents to target dir
+                if "ses-01" in folder:
+                    target_dir = os.path.join(
+                        base_path, subject, "ses-01", "derivatives", "longitudinal"
+                    )
                     os.makedirs(target_dir, exist_ok=True)
                     shutil.move(folder_path, target_dir)
-                elif "_base" in folder:
-                    target_dir = os.path.join(SUBJECTS_DIR, "ses-01", "derivatives", "longitudinal")
+                # if folder name has "ses-02", move the contents to target dir
+                elif "ses-02" in folder:
+                    target_dir = os.path.join(
+                        base_path, subject, "ses-02", "derivatives", "longitudinal"
+                    )
+                    os.makedirs(target_dir, exist_ok=True)
                     shutil.move(folder_path, target_dir)
+            # if folder name contains "base" and NOT long
+            elif "_base" in folder and ".long." not in folder:
+                # move the contents to target dir
+                target_dir = os.path.join(
+                    base_path, subject, "ses-01", "derivatives", "longitudinal"
+                )
+                os.makedirs(target_dir, exist_ok=True)
+                shutil.move(folder_path, target_dir)
 
-
-def process_longitudinal(subject_dir, SUBJECTS_DIR):
-    # Extract the subject name
+def process_longitudinal(subject_dir):
     subject = os.path.basename(subject_dir)
+    base_path = os.path.dirname(subject_dir)
 
-    # If subject_dir has a subfolder called ses-01 and ses-02 and both have a derivatives folder, then run the longitudinal pipeline
-    ses_01_output = os.path.exists(os.path.join(subject_dir, "ses-1", "derivatives", subject))
-    ses_02_output = os.path.exists(os.path.join(subject_dir, "ses-2", "derivatives", subject))
+    print(f"Processing {subject}")
 
-    if ses_01_output and ses_02_output:
-        run_longitudinal_pipeline(subject, SUBJECTS_DIR)
-        cleanup_and_move_files(SUBJECTS_DIR, subject)
-    else:
-        print(f"Scans for {subject} have not been processed through freesurfer. Skipping longitudinal pipeline.")
+    create_symlinks(subject, base_path)
+    run_longitudinal_pipeline(subject, base_path)
+    cleanup_and_move_files(subject, base_path)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python process_longitudinal.py <SUBJECTS_DIR>")
+        print("Usage: python process_longitudinal.py <subject_dir>")
         sys.exit(1)
 
-    # Accept specific subject directory as an argument
     subject_dir = sys.argv[1]
-    # Extract the main SUBJECTS_DIR from the specific subject directory
-    SUBJECTS_DIR = os.path.dirname(subject_dir)
+    process_longitudinal(subject_dir)
 
-    process_longitudinal(subject_dir, SUBJECTS_DIR)
