@@ -47,6 +47,10 @@ echo ""
 echo ""
 
 # Dependency Checks
+if ! command -v python3 &> /dev/null; then
+    echo "Error: Python3 is not found. To install, type: brew install python3"
+    exit 1
+fi
 if ! command -v freeview &> /dev/null; then
     echo "Error: FreeSurfer's freeview command is not found."
     exit 1
@@ -61,6 +65,8 @@ if ! command -v parallel &> /dev/null; then
     echo "Error: GNU Parallel is not found. To install, type: brew install parallel"
     exit 1
 fi
+
+
 
 # Prompt user for paths
 if [ -z "$SUBJECTS_DIR" ]; then
@@ -211,6 +217,52 @@ create_2d_slices() {
     rm "$output_dir/"frame-2d-*.png
 }
 
+create_2d_slices_longitudinal() {
+       local subj=$1
+    local sub_path=$2
+    local session=$3
+    local output_dir=$4
+    local cmd_file="$output_dir/freeview-commands-2d"
+
+    echo $subj $sub_path $session $output_dir $cmd_file
+
+    echo "-viewport coronal" > "$cmd_file"
+    echo "-zoom 1.2" >> "$cmd_file"
+    for n in $(seq 10 10 200); do
+        echo "-slice 130 150 $n" >> "$cmd_file"
+        echo "-ss $output_dir/frame-2d-coronal-$(printf '%03d' $n).png" >> "$cmd_file"
+    done
+    echo "-viewport axial" >> "$cmd_file"
+    for n in $(seq 40 10 230); do
+        echo "-slice 130 $n 132" >> "$cmd_file"
+        echo "-ss $output_dir/frame-2d-axial-$(printf '%03d' $n).png" >> "$cmd_file"
+    done
+    echo "-quit" >> "$cmd_file"
+
+    
+    echo "Running freeview"
+    echo ""
+    echo ""
+    freeview -v \
+        "$sub_path/${session}/derivatives/longitudinal/${subj}/mri/T1.mgz" \
+        "$sub_path/${session}/derivatives/longitudinal/${subj}/mri/aparc+aseg.mgz" \
+        "$sub_path/${session}/derivatives/longitudinal/${subj}/mri/brainmask.mgz" \
+        "$sub_path/${session}/derivatives/longitudinal/${subj}/mri/aseg.mgz:colormap=lut:opacity=0.2" \
+        -f "$sub_path/${session}/derivatives/longitudinal/${subj}/surf/lh.white:edgecolor=blue" \
+        "$sub_path/${session}/derivatives/longitudinal/${subj}/surf/lh.pial:edgecolor=red" \
+        "$sub_path/${session}/derivatives/longitudinal/${subj}/surf/rh.white:edgecolor=blue" \
+        "$sub_path/${session}/derivatives/longitudinal/${subj}/surf/rh.pial:edgecolor=red" \
+        -cmd "$cmd_file"
+    
+    echo "Creating montage"
+    echo ""
+    echo ""
+    magick montage "$output_dir/"frame-2d-*.png -tile 5x8 -geometry +0+0 "$output_dir/montage-2d.png"
+
+    rm "$output_dir/"frame-2d-*.png
+}
+
+
 create_3d_slices() {
     local subj=$1
     local sub_path=$2
@@ -253,6 +305,48 @@ create_3d_slices() {
     rm "$output_dir/"parc-3d-*.png
 }
 
+create_3d_slices_longitudinal() {
+    local subj=$1
+    local sub_path=$2
+    local session=$3
+    local output_dir=$4
+    local cmd_file="$output_dir/freeview-commands-3d"
+
+    echo "-viewport 3d" > "$cmd_file"
+    echo "-hide-3d-frames" >> "$cmd_file"
+    echo "-zoom 1.5" >> "$cmd_file"
+    echo "-ss $output_dir/parc-3d-01-left.png" >> "$cmd_file"
+    echo "-cam azimuth 90 " >> "$cmd_file"
+    echo "-ss $output_dir/parc-3d-02-caudal.png" >> "$cmd_file"
+    echo "-cam azimuth 90 " >> "$cmd_file"
+    echo "-ss $output_dir/parc-3d-03-right.png" >> "$cmd_file"
+    echo "-cam azimuth 90" >> "$cmd_file"
+    echo "-ss $output_dir/parc-3d-04-rostral.png" >> "$cmd_file"
+    echo "-cam azimuth 180 elevation 90" >> "$cmd_file"
+    echo "-ss $output_dir/parc-3d-05-dorsal.png" >> "$cmd_file"
+    echo "-cam elevation 180" >> "$cmd_file"
+    echo "-ss $output_dir/parc-3d-06-ventral.png" >> "$cmd_file"
+    echo "-quit" >> "$cmd_file"
+
+    
+    echo "Running freeview"
+    echo ""
+    echo ""
+    freeview -v \
+        "$sub_path/${session}/derivatives/longitudinal/${subj}/mri/brainmask.mgz" \
+        -f "$sub_path/${session}/derivatives/longitudinal/${subj}/surf/lh.pial:annot=aparc.annot:name=pial_aparc:visible=1" \
+        "$sub_path/${session}/derivatives/longitudinal/${subj}/surf/rh.pial:annot=aparc.annot:name=pial_aparc:visible=1" \
+        -cmd "$cmd_file"
+    
+    echo "Creating montage"
+    echo ""
+    echo ""
+    magick montage "$output_dir/"parc-3d-*.png -tile 3x2 -geometry +0+0 "$output_dir/montage-3d.png"
+
+    # Delete the individual images and only keep the montage
+    rm "$output_dir/"parc-3d-*.png
+}
+
 process_visualization() {
     local subj=$1
     local session=$2
@@ -278,6 +372,30 @@ process_visualization() {
     echo ""
 }
 
+process_visualization_longitudinal() {
+    local subj=$1
+    local session=$2
+    local sub_path="${SUBJECTS_DIR}/${subj}"
+    local FREESURFER_OUT="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal"
+    local output_dir="${FREESURFER_OUT}/qa-output"
+    
+    echo "Processing $subj"
+    [ ! -d "$output_dir" ] && mkdir -p "$output_dir"
+    echo ""
+    echo ""
+    echo "Creating 2d slices"
+    create_2d_slices_longitudinal "$subj" "$sub_path" "$session" "$output_dir"
+    echo ""
+    echo ""
+    echo "Creating 3d slices"
+    create_3d_slices_longitudinal "$subj" "$sub_path" "$session" "$output_dir"
+    echo ""
+    echo "" 
+    # Printing the confirmation at the end
+    echo "QA images for $subj printed"
+    echo ""
+    echo ""
+}
 process_t1_without_visualization() {
     local t1_path="$1"
     local subj=$(echo "$t1_path" | grep -Eo 'sub-[a-zA-Z0-9]+' | head -n1)
@@ -295,6 +413,25 @@ process_t1_without_visualization() {
     fi
 }
 export -f process_t1_without_visualization  # Export the function so parallel can use it
+
+process_longitudinal_without_visualization() {
+    local t1_path="$1"
+    local subj=$(echo "$t1_path" | grep -Eo 'sub-[a-zA-Z0-9]+' | head -n1)
+    local session=$(echo "$t1_path" | grep -Eo 'ses-[a-zA-Z0-9]+' | head -n1)
+    local FREESURFER_OUT="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal"
+    
+    [ ! -d "$FREESURFER_OUT" ] && mkdir -p "$FREESURFER_OUT" 
+    if [ -f "$t1_path" ]; then
+        recon-all -i "$t1_path" -s "$subj" -all -qcache -sd "$FREESURFER_OUT"
+        segmentHA_T1.sh "$subj"
+    else
+        echo "T1 file not found for $subj"
+        echo ""
+        echo ""
+    fi
+}
+
+export -f process_longitudinal_without_visualization  # Export the function so parallel can use it
 
 # If there are T1s that haven't been processed
 if [ ${#t1s_not_processed[@]} -gt 0 ]; then
@@ -347,12 +484,14 @@ if [ ! -d "$measures_folder" ]; then
 fi
 
 
+# LONGITUDINAL PIPELINE
+
 BASE_SUBJECTS_DIR="$SUBJECTS_DIR"
 
 # Function to check if the subject has already been processed
 is_already_processed() {
     local subject_dir="$1"
-    local log_files=("$subject_dir"/*/*/derivatives/longitudinal/*/scripts/recon-all.log)
+    local log_files=("$subject_dir"/*/derivatives/longitudinal/*/scripts/recon-all.log)
     for log_file in "${log_files[@]}"; do
         if [[ -f "$log_file" && $(grep -c "finished without error" "$log_file") -gt 0 ]]; then
             return 0
@@ -369,42 +508,122 @@ if [[ $LONGITUDINAL_CHOICE == "yes" ]]; then
     for subject_dir in "$BASE_SUBJECTS_DIR"/sub-*; do
         if [ -d "$subject_dir" ] && ! is_already_processed "$subject_dir"; then
             subjects+=("$subject_dir")
+            echo "$subjects is missing longitudinal processing, running it now..."
         fi
     done
     
     # Use parallel to run each subject on a different core and generate the montages
-    parallel -j+0 "python3 process_longitudinal.py {}" ::: "${subjects[@]}"
+    #parallel -j+0 "python3 process_longitudinal.py {}" ::: "${subjects[@]}"
+
+    # After parallel processing, run process_visualization_longitudinal sequentially
+    for subject_dir in "${subjects[@]}"; do
+        subj=$(echo "$subject_dir" | grep -Eo 'sub-[a-zA-Z0-9]+' | head -n1)
+        session=$(echo "$subject_dir" | grep -Eo 'ses-[a-zA-Z0-9]+' | head -n1)
+        process_visualization_longitudinal "$subj" "$session"
+    done
+
 fi
 
 
 # Define paths for longitudinal outputs
-log_path_long="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal/${subj}/scripts/recon-all.log"
+log_path_long="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal"
+echo $log_path_long
 montage_3d_long="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal/qa-output/montage-3d.png"
 montage_2d_long="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal/qa-output/montage-2d.png"
 
 
 # Create an empty array to keep track of T1s without longitudinal montages
 t1s_without_montage_long=()
+echo "Checking which T1s have been processed through the longitudinal pipeline but don't have montages..."
+echo ""
+echo ""
 
-# Checking which T1s have not been processed through the longitudinal pipeline
 for subj in $SUBJECTS; do
+    echo "Processing subject: $subj"
     for session in ses-01 ses-02; do
-        if [ ! -f "$log_path_long" ] || ! grep -q "finished without error" "$log_path_long"; then
+        echo "Session: $session"
+        base_folder="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal"
+        
+        # Check if base folder exists
+        if [ ! -d "$base_folder" ]; then
+            echo "Directory does not exist: $base_folder"
             continue
-        elif [ ! -f "$montage_3d_long" ] || [ ! -f "$montage_2d_long" ]; then
-            t1s_without_montage_long+=("$T1")
         fi
+
+        # Search for recon-all.log files in the specified directory structure
+        log_paths=$(find "$base_folder" -type f -name "recon-all.log" -path "*/scripts/recon-all.log")
+
+        # Iterate through each found log file
+        for log_path in $log_paths; do
+            folder=$(dirname "$log_path")
+            qa_output_folder="${folder}/../qa-output"
+
+            # Create qa-output folder if it doesn't exist
+            if [ ! -d "$qa_output_folder" ]; then
+                mkdir -p "$qa_output_folder"
+            fi
+
+            montage_3d_long="${qa_output_folder}/montage-3d.png"
+            montage_2d_long="${qa_output_folder}/montage-2d.png"
+
+            if grep -q "finished without error" "$log_path"; then
+                if [ ! -f "$montage_3d_long" ] || [ ! -f "$montage_2d_long" ]; then
+                    t1s_without_montage_long+=("$log_path")
+                    echo "These T1s have been processed through the longitudinal pipeline but don't have montages:"
+                    echo "$log_path"
+                    echo ""
+                    echo ""
+                fi
+            else
+                echo "The processing did not finish without error for log file: $log_path"
+                echo ""
+                echo ""
+            fi
+        done
     done
 done
 
-# Process montages for the longitudinal output
-for t1_path in "${t1s_without_montage_long[@]}"; do
-    subj=$(echo "$t1_path" | grep -Eo 'sub-[a-zA-Z0-9]+' | head -n1)
-    session=$(echo "$t1_path" | grep -Eo 'ses-[a-zA-Z0-9]+' | head -n1)
-    FREESURFER_OUT_LONG="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal"
-    
-    process_visualization "$subj" "$session" 
-done
+if [ ${#t1s_without_montage_long[@]} -ne 0 ]; then
+    echo "Summary of T1s without montages:"
+    for t1 in "${t1s_without_montage_long[@]}"; do
+        echo "$t1"
+        echo ""
+        echo ""
+        
+    done
+fi
+
+
+# If there are T1s processed throught the longitudinal pipeline but without montages
+if [ ${#t1s_without_montage_long[@]} -gt 0 ]; then
+    read -p "Do you want to generate montages for these longitudinal outputs? (yes/no): " MONTAGE_CHOICE
+    if [[ $MONTAGE_CHOICE == "yes" ]]; then
+        echo "Generating montages..."
+        echo ""
+        echo ""
+
+        for log_path in "${t1s_without_montage_long[@]}"; do
+            # The directory containing the recon-all.log file
+            recon_all_dir=$(dirname "$log_path")
+
+            # Assuming the structure: {subject}/{session}/derivatives/longitudinal/{any folder}/scripts/recon-all.log
+            # Extract subject and session information from the directory structure
+            subj=$(echo "$recon_all_dir" | awk -F'/' '{print $(NF-5)}')
+            session=$(echo "$recon_all_dir" | awk -F'/' '{print $(NF-4)}')
+
+            if [ -z "$subj" ] || [ -z "$session" ]; then
+                echo "Could not extract subject/session information from log path: $log_path"
+                continue
+            fi
+
+            echo "Processing visualizations for $subj, $session"
+            FREESURFER_OUT_LONG="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal"
+            
+            process_visualization_longitudinal "$subj" "$session" 
+        done
+    fi
+fi
+
 
 echo "Extracting longitudinal data into csv files..."
 echo ""
@@ -446,6 +665,7 @@ for csv_file in $csv_files; do
     python3 process_csv.py $csv_file
 done
 
+
 # For all files in $measures_folder, merge them by sub and ses and save them in the same folder as all_measures.csv
 python3 merge_csv.py $measures_folder
 echo ""
@@ -457,5 +677,6 @@ echo ""
 echo ""
 echo ""
 echo ""
+
 
 
