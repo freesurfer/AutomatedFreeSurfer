@@ -513,7 +513,7 @@ if [[ $LONGITUDINAL_CHOICE == "yes" ]]; then
     done
     
     # Use parallel to run each subject on a different core and generate the montages
-    #parallel -j+0 "python3 process_longitudinal.py {}" ::: "${subjects[@]}"
+    parallel -j+0 "python3 process_longitudinal.py {}" ::: "${subjects[@]}"
 
     # After parallel processing, run process_visualization_longitudinal sequentially
     for subject_dir in "${subjects[@]}"; do
@@ -594,7 +594,7 @@ if [ ${#t1s_without_montage_long[@]} -ne 0 ]; then
 fi
 
 
-# If there are T1s processed throught the longitudinal pipeline but without montages
+# If there are T1s processed through the longitudinal pipeline but without montages
 if [ ${#t1s_without_montage_long[@]} -gt 0 ]; then
     read -p "Do you want to generate montages for these longitudinal outputs? (yes/no): " MONTAGE_CHOICE
     if [[ $MONTAGE_CHOICE == "yes" ]]; then
