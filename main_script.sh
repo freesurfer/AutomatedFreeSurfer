@@ -118,9 +118,9 @@ for subj in $SUBJECTS; do
             continue
         fi
 
-        log_path="${SUBJECTS_DIR}/${subj}/${session}/derivatives/${subj}/scripts/recon-all.log"
-        montage_3d="${SUBJECTS_DIR}/${subj}/${session}/derivatives/${subj}/qa-output/montage-3d.png"
-        montage_2d="${SUBJECTS_DIR}/${subj}/${session}/derivatives/${subj}/qa-output/montage-2d.png"
+        log_path="${SUBJECTS_DIR}/${subj}/${session}/derivatives/scripts/recon-all.log"
+        montage_3d="${SUBJECTS_DIR}/${subj}/${session}/derivatives/qa-output/montage-3d.png"
+        montage_2d="${SUBJECTS_DIR}/${subj}/${session}/derivatives/qa-output/montage-2d.png"
 
         if [ ! -f "$log_path" ] || ! grep -q "finished without error" "$log_path"; then
             t1s_not_processed+=("$T1")
