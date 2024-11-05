@@ -40,7 +40,7 @@ echo ""
 echo ""
 echo ""
 echo ""
-echo "Please DO NOT close this window until the script is finished."
+echo "Please DO NOT close this window until the script has finished."
 echo ""
 echo ""
 echo ""
@@ -72,14 +72,14 @@ fi
 if [ -z "$SUBJECTS_DIR" ]; then
     read -p "Enter the path to the SUBJECTS dataset: " SUBJECTS_DIR
 else
-    read -p "Enter the path to the SUBJECTS dataset [current path: $SUBJECTS_DIR - if this is OK, just click enter]: " NEW_SUBJECTS_DIR
+    read -p "Enter the path to the SUBJECTS dataset [current path: $SUBJECTS_DIR - if this is OK, just press enter]: " NEW_SUBJECTS_DIR
     SUBJECTS_DIR=${NEW_SUBJECTS_DIR:-$SUBJECTS_DIR}
 fi
 
 if [ -z "$FREESURFER_HOME" ]; then
     read -p "Enter the path to Freesurfer installation: " FREESURFER_HOME
 else
-    read -p "Enter the path to Freesurfer installation [current path: $FREESURFER_HOME - if this is OK, just click enter]: " NEW_FREESURFER_HOME
+    read -p "Enter the path to Freesurfer installation [current path: $FREESURFER_HOME - if this is OK, just press enter]: " NEW_FREESURFER_HOME
     FREESURFER_HOME=${NEW_FREESURFER_HOME:-$FREESURFER_HOME}
 fi
 
