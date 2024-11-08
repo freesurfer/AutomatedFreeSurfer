@@ -133,7 +133,7 @@ echo ""
 echo ""
 
 # Extracting metadata from the T1s
-python3 extract_metadata.py "${t1s_array[@]}"
+python3 "${SUBJECTS_DIR}/extract_metadata.py" "${t1s_array[@]}"
 
 
 
