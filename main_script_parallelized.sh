@@ -169,7 +169,59 @@ echo "Found ${#t1s_not_processed[@]} T1 images that have not been processed thro
 echo "Found ${#t1s_without_montage[@]} T1 images without montages."
 echo ""
 echo ""
+echo ""
 
+echo "Which pipeline do you want to use?"
+echo "1) Classical FreeSurfer (recon-all)"
+echo "2) FastSurfer (deep learning-based, much faster)"
+read -p "Enter 1 or 2: " FS_CHOICE
+
+if [[ "$FS_CHOICE" == "2" ]]; then
+    USE_FASTSURFER=true
+    if ! command -v fastsurfer.sh &> /dev/null; then
+        echo "Error: FastSurfer not found. Ensure it's installed and in your PATH."
+        exit 1
+    fi
+else
+    USE_FASTSURFER=false
+fi
+
+if [[ "$FS_CHOICE" == "2" ]]; then
+    USE_FASTSURFER=true
+
+    # Check if fastsurfer.sh is installed
+    if ! command -v fastsurfer.sh &> /dev/null; then
+        echo "Error: FastSurfer is not installed or not in your PATH."
+        echo "Install it from: https://github.com/Deep-MI/FastSurfer"
+        exit 1
+    fi
+
+    # Check for required dependencies
+    if ! command -v python3 &> /dev/null; then
+        echo "Error: Python3 is required for FastSurfer."
+        exit 1
+    fi
+    if ! python3 -c "import nibabel" &> /dev/null; then
+        echo "Error: Python package 'nibabel' is missing. Install it via 'pip install nibabel'."
+        exit 1
+    fi
+    if ! command -v mri_convert &> /dev/null; then
+        echo "Error: FreeSurfer tools (like mri_convert) must still be installed and in your PATH."
+        exit 1
+    fi
+    if ! python3 -c "import torch" &> /dev/null; then
+        echo "Error: PyTorch is missing. Install it via 'pip install torch'."
+        exit 1
+    fi
+    if ! python3 -c "import skimage" &> /dev/null; then
+        echo "Error: skimage is missing. Install it via 'pip install scikit-image'."
+        exit 1
+    fi
+
+    echo "FastSurfer and dependencies detected. Proceeding..."
+else
+    USE_FASTSURFER=false
+fi
 
 
 create_2d_slices() {
@@ -401,10 +453,15 @@ process_t1_without_visualization() {
     local subj=$(echo "$t1_path" | grep -Eo 'sub-[a-zA-Z0-9]+' | head -n1)
     local session=$(echo "$t1_path" | grep -Eo 'ses-[a-zA-Z0-9]+' | head -n1)
     local FREESURFER_OUT="${SUBJECTS_DIR}/${subj}/${session}/derivatives"
-    
+
     [ ! -d "$FREESURFER_OUT" ] && mkdir -p "$FREESURFER_OUT" 
+
     if [ -f "$t1_path" ]; then
-        recon-all -i "$t1_path" -s "$subj" -all -qcache -sd "$FREESURFER_OUT"
+        if [ "$USE_FASTSURFER" = true ]; then
+            fastsurfer.sh --t1 "$t1_path" --sid "$subj" --sd "$FREESURFER_OUT" --parallel --fs_license "$FREESURFER_HOME/license.txt"
+        else
+            recon-all -i "$t1_path" -s "$subj" -all -qcache -sd "$FREESURFER_OUT"
+        fi
         segmentHA_T1.sh "$subj"
     else
         echo "T1 file not found for $subj"
@@ -421,8 +478,13 @@ process_longitudinal_without_visualization() {
     local FREESURFER_OUT="${SUBJECTS_DIR}/${subj}/${session}/derivatives/longitudinal"
     
     [ ! -d "$FREESURFER_OUT" ] && mkdir -p "$FREESURFER_OUT" 
+
     if [ -f "$t1_path" ]; then
-        recon-all -i "$t1_path" -s "$subj" -all -qcache -sd "$FREESURFER_OUT"
+        if [ "$USE_FASTSURFER" = true ]; then
+            fastsurfer.sh --t1 "$t1_path" --sid "$subj" --sd "$FREESURFER_OUT" --parallel --fs_license "$FREESURFER_HOME/license.txt"
+        else
+            recon-all -i "$t1_path" -s "$subj" -all -qcache -sd "$FREESURFER_OUT"
+        fi
         segmentHA_T1.sh "$subj"
     else
         echo "T1 file not found for $subj"
