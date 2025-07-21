@@ -5,6 +5,9 @@ These scripts are tailored to process T1 images in a BIDS-formatted dataset usin
 
 Designed for simplicity, users will interact through a series of prompts to navigate specific processes. Apart from setting some paths, no additional programming is required, the pipeline takes care of it. Ensure that all scripts are downloaded from this repository and saved in your BIDS folder alongside your subjects' directories.
 
+## Update 2025
+Added Fastsurfer options for the cross sectional processing. 
+
 ## Table of Contents
 
 1. [Author Information](#author-information)
