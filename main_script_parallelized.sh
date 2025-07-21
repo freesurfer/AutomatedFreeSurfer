@@ -223,6 +223,121 @@ else
     USE_FASTSURFER=false
 fi
 
+# Ask for FastSurfer processing mode
+if [[ "$USE_FASTSURFER" = true ]]; then
+    echo ""
+    echo "Choose FastSurfer mode:"
+    echo "1) Use Docker with GPU (recommended)"
+    echo "2) Use local FastSurfer installation (no Docker)"
+    read -p "Enter 1 or 2: " FASTSURFER_MODE
+
+    if [[ "$FASTSURFER_MODE" == "1" ]]; then
+        # Docker + GPU
+        if ! command -v docker &> /dev/null; then
+            echo "Docker not found. Falling back to local FastSurfer."
+            FASTSURFER_MODE=2
+        else
+            docker info | grep -q 'Runtimes:.*nvidia'
+            if [[ $? -ne 0 ]]; then
+                echo "Docker does not appear to support GPU (nvidia runtime missing). Falling back to local FastSurfer."
+                FASTSURFER_MODE=2
+            fi
+        fi
+    fi
+
+    if [[ "$FASTSURFER_MODE" == "2" ]]; then
+        if [ -z "$FASTSURFER_HOME" ]; then
+            read -p "Enter path to your local FastSurfer installation: " FASTSURFER_HOME
+        fi
+        if [ ! -d "$FASTSURFER_HOME" ]; then
+            echo "Error: FastSurfer path invalid."
+            exit 1
+        fi
+        export FREESURFER_HOME="$FREESURFER_HOME"
+        source "$FREESURFER_HOME/SetUpFreeSurfer.sh"
+    fi
+fi
+
+# Create subject list file for FastSurfer
+fastsurfer_subject_list="${SUBJECTS_DIR}/fastsurfer_subjects_list.txt"
+rm -f "$fastsurfer_subject_list"
+
+for t1_path in "${t1s_not_processed[@]}"; do
+    subj=$(echo "$t1_path" | grep -Eo 'sub-[a-zA-Z0-9]+' | head -n1)
+
+    if is_fastsurfer_done "$subj" "$SUBJECTS_DIR"; then
+        echo "Skipping $subj — already processed."
+        continue
+    fi
+
+    echo "${subj}=${t1_path}" >> "$fastsurfer_subject_list"
+done
+if [ ! -s "$fastsurfer_subject_list" ]; then
+    echo "All T1s already processed by FastSurfer. Nothing to run."
+    exit 0
+fi
+
+if [[ "$USE_FASTSURFER" == true ]]; then
+    if [[ "$FASTSURFER_MODE" == "1" ]]; then
+        echo "Running FastSurfer in Docker..."
+        docker run --gpus all \
+            -v "${SUBJECTS_DIR}:/data" \
+            -v "${SUBJECTS_DIR}:/output" \
+            -v "${FREESURFER_HOME}:/fs_license" \
+            --entrypoint "/fastsurfer/brun_fastsurfer.sh" \
+            --rm --user $(id -u):$(id -g) \
+            deepmi/fastsurfer:latest \
+            --fs_license /fs_license/license.txt \
+            --sd /output \
+            --subject_list /data/fastsurfer_subjects_list.txt \
+            --3T \
+            --parallel_seg 2 --parallel_surf max \
+            --threads_seg 8 --threads_surf 4
+    else
+        echo "Running FastSurfer locally..."
+        "$FASTSURFER_HOME/brun_fastsurfer.sh" \
+            --subject_list "$fastsurfer_subject_list" \
+            --sd "$SUBJECTS_DIR" \
+            --3T \
+            --parallel_seg 2 --parallel_surf max \
+            --threads_seg 8 --threads_surf 4
+    fi
+
+    # Run QA after FastSurfer
+    while IFS="=" read -r subj t1; do
+        session=$(echo "$t1" | grep -Eo 'ses-[a-zA-Z0-9]+' | head -n1)
+        process_visualization "$subj" "$session"
+    done < "$fastsurfer_subject_list"
+
+else
+    # Run classical FreeSurfer pipeline
+    parallel process_t1_without_visualization ::: "${t1s_not_processed[@]}"
+
+    for t1_path in "${t1s_not_processed[@]}"; do
+        subj=$(echo "$t1_path" | grep -Eo 'sub-[a-zA-Z0-9]+' | head -n1)
+        session=$(echo "$t1_path" | grep -Eo 'ses-[a-zA-Z0-9]+' | head -n1)
+        process_visualization "$subj" "$session"
+    done
+fi
+
+is_fastsurfer_done() {
+    local subj_id="$1"
+    local subject_dir="$2/$subj_id"
+
+    # Check for FastSurfer-style output
+    if [ -f "${subject_dir}/mri/orig.mgz" ]; then
+        return 0
+    fi
+
+    # Check for recon-all.log with success
+    local log_path=$(find "${subject_dir}" -type f -name "recon-all.log" | grep -m1 "/scripts/recon-all.log")
+    if [ -f "$log_path" ] && grep -q "finished without error" "$log_path"; then
+        return 0
+    fi
+
+    return 1
+}
+
 
 create_2d_slices() {
     local subj=$1
@@ -516,6 +631,16 @@ if [ ${#t1s_not_processed[@]} -gt 0 ]; then
         done
     fi
 fi
+
+is_fastsurfer_done() {
+    local subj_id="$1"
+    local output_dir="$2"
+    if [ -f "${output_dir}/${subj_id}/mri/orig.mgz" ]; then
+        return 0  # already processed
+    else
+        return 1  # needs processing
+    fi
+}
 
 
 
